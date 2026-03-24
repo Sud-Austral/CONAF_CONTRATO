@@ -154,7 +154,7 @@ const ContractDrawer = ({ isOpen, onClose, employee }) => {
             </button>
             <div className="flex flex-col">
               <h2 className="text-xl font-black font-display text-neutral-900 leading-tight tracking-tight truncate max-w-[340px]">
-                {employee?.nombrecompleto_x || 'Cargando...'}
+                {employee?.nombreencontrado || employee?.nombrecompleto_x || 'Cargando...'}
               </h2>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[9px] uppercase font-black text-primary tracking-extreme">Legislación Vigente</span>

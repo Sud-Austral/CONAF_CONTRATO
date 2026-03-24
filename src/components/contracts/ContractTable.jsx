@@ -87,8 +87,12 @@ const ContractTable = ({ employees, onOpenContract }) => {
                   <td className="px-6 py-5 text-[11px] font-black text-primary-dark font-mono tracking-tighter whitespace-nowrap border-r border-neutral-50/50 group-hover:bg-primary/5 transition-colors">{fmtRut(row.rut)}</td>
                   <td className="px-6 py-5">
                     <div className="flex flex-col">
-                      <span className="text-sm font-black text-neutral-900 leading-tight group-hover:text-primary transition-colors">{row.nombrecompleto_x}</span>
-                      <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1">{row.sexo}</span>
+                      <span className="text-sm font-black text-neutral-900 leading-tight group-hover:text-primary transition-colors">
+                        {row.nombreencontrado || row.nombrecompleto_x || 'N/A'}
+                      </span>
+                      <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1">
+                        {row.sexo === 'M' ? 'Masculino' : 'Femenino'}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-5 text-[11px] font-bold text-neutral-500 truncate italic">{truncate(row.tipo_cargo, 35)}</td>

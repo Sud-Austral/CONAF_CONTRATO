@@ -58,7 +58,7 @@ const ContractsPage = () => {
     return latestRows.filter(r => {
       // Búsqueda Texto
       const term = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      const name = (r.nombrecompleto_x || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const name = (r.nombreencontrado || r.nombrecompleto_x || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const matchesSearch = !searchTerm || name.includes(term) || String(r.rut).toLowerCase().includes(term);
 
       // Filtro Cargo
