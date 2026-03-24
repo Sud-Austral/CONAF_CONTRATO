@@ -75,17 +75,43 @@ export async function fetchData() {
   const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
   const url = `${cleanBase}/data.json.gz`;
   
+  console.log("Intentando descargar datos desde:", url);
+  
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP error! status: ${res.status} at ${url}`);
+  if (!res.ok) {
+    console.error("Fallo la descarga:", res.status, res.statusText);
+    throw new Error(`HTTP error! status: ${res.status} at ${url}`);
+  }
   
   const buffer = await res.arrayBuffer();
+  console.log("Buffer recibido. Tamaño:", buffer.byteLength, "bytes");
+  
+  const firstBytes = new Uint8Array(buffer.slice(0, 10));
+  console.log("Primeros 10 bytes del buffer:", firstBytes);
+
   try {
-    const decompressed = pako.inflate(new Uint8Array(buffer), { to: "string" });
+    // Si los primeros bytes son 31, 139 (0x1f 0x8b), es un archivo GZIP
+    let decompressed;
+    if (firstBytes[0] === 31 && firstBytes[1] === 139) {
+      console.log("Detectado formato GZIP, procediendo a descomprimir...");
+      decompressed = pako.ungzip(new Uint8Array(buffer), { to: "string" });
+    } else {
+      console.warn("No se detectó cabecera GZIP. Intentando parsear como texto plano...");
+      const decoder = new TextDecoder();
+      decompressed = decoder.decode(buffer);
+    }
+
     const rawData = JSON.parse(decompressed);
+    console.log("Datos parseados correctamente. Estructura:", Object.keys(rawData));
+    
     const parsed = parseDataJson(rawData);
+    console.log("Datos normalizados:", parsed.length, "filas");
+    
     return enrichRows(parsed);
   } catch (error) {
-    console.error("Error descomprimiendo o parseando datos:", error);
+    console.error("Error detallado al procesar los datos:");
+    console.error("- Mensaje:", error.message);
+    if (error.stack) console.error("- Stack:", error.stack);
     throw error;
   }
 }

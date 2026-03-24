@@ -94,8 +94,8 @@ const ContractTable = ({ employees, onOpenContract }) => {
                   <td className="px-6 py-4 text-xs font-medium text-gray-600 truncate italic">{truncate(row.tipo_cargo, 35)}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      row.tipo_de_contrato?.includes('Planta') ? 'bg-emerald-100 text-emerald-800' :
-                      row.tipo_de_contrato?.includes('Honorarios') ? 'bg-amber-100 text-amber-800' :
+                      String(row.tipo_de_contrato || '').includes('Planta') ? 'bg-emerald-100 text-emerald-800' :
+                      String(row.tipo_de_contrato || '').includes('Honorarios') ? 'bg-amber-100 text-amber-800' :
                       'bg-sky-100 text-sky-800'
                     }`}>
                       {row.tipo_de_contrato}
