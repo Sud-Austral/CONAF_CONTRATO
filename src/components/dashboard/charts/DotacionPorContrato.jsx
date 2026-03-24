@@ -10,9 +10,9 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const total = payload[0].payload.value;
     return (
-      <div className="bg-white/95 backdrop-blur-sm p-3 shadow-xl border border-conaf-100 rounded-lg">
+      <div className="bg-white/95 backdrop-blur-sm p-3 shadow-xl border border-conaf-300 rounded-lg">
         <p className="font-bold text-conaf-800 text-sm mb-1">{label}</p>
-        <p className="text-sm font-medium text-text-muted">
+        <p className="text-sm font-medium text-text-main">
           Funcionarios: <span className="font-bold text-conaf-600">{total}</span>
         </p>
       </div>

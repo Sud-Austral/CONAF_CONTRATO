@@ -1,51 +1,125 @@
 import React from 'react';
-import { LayoutDashboard, FileText, Trees } from 'lucide-react';
+import { useConafData } from '../../context/DataContext';
 
 const Navbar = ({ activeTab, setActiveTab }) => {
+  const { rows } = useConafData();
+  const totalEmployees = new Intl.NumberFormat('es-CL').format(new Set(rows.map(r => r.rut)).size);
+
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { id: 'contracts', label: 'Gestión de Contratos', icon: <FileText size={20} /> },
+    { id: 'dashboard', label: 'Dashboard', badge: totalEmployees },
+    { id: 'contracts', label: 'Gestión de Contratos' },
   ];
 
   return (
-    <nav className="h-14 bg-conaf-800 shadow-md flex items-center justify-between px-6 z-50">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-conaf-700 shadow-sm">
-          <Trees size={22} strokeWidth={2.5} />
+    <nav style={{
+      height: '56px',
+      backgroundColor: '#1B5E20',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingLeft: '24px',
+      paddingRight: '24px',
+      position: 'relative',
+      zIndex: 50,
+      boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+      flexShrink: 0,
+    }}>
+      {/* Brand */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{
+          width: '32px', height: '32px',
+          backgroundColor: 'rgba(255,255,255,0.1)',
+          borderRadius: '8px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          border: '1px solid rgba(255,255,255,0.15)',
+          color: '#A5D6A7',
+          fontSize: '14px',
+        }}>🌲</div>
+        <div>
+          <div style={{ color: '#ffffff', fontWeight: '500', fontSize: '14px', letterSpacing: '0.05em', lineHeight: 1 }}>
+            CONAF
+          </div>
+          <div style={{ color: '#A5D6A7', fontWeight: '500', fontSize: '8px', letterSpacing: '0.15em', marginTop: '2px' }}>
+            INSTITUCIONAL
+          </div>
         </div>
-        <h1 className="text-white font-display text-lg font-bold tracking-tight">CONAF</h1>
       </div>
 
-      <div className="flex items-center gap-8 h-full">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`
-              flex items-center gap-2 px-3 h-full transition-all relative border-b-3
-              ${activeTab === tab.id 
-                ? 'text-white font-semibold' 
-                : 'text-conaf-200 hover:text-white'
-              }
-            `}
-          >
-            {tab.icon}
-            <span className="text-sm">{tab.label}</span>
-            {activeTab === tab.id && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gold animate-in fade-in slide-in-from-bottom-1" />
-            )}
-          </button>
-        ))}
+      {/* Tabs */}
+      <div style={{ display: 'flex', alignItems: 'stretch', height: '100%' }}>
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                paddingLeft: '20px',
+                paddingRight: '20px',
+                height: '100%',
+                backgroundColor: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                color: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                border: 'none',
+                borderBottom: isActive ? '3px solid #A5D6A7' : '3px solid transparent',
+                cursor: 'pointer',
+                fontWeight: '500',
+                fontSize: '11px',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                transition: 'all 0.3s ease',
+                fontFamily: 'inherit',
+              }}
+              onMouseEnter={e => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                  e.currentTarget.style.color = '#ffffff';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!isActive) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                }
+              }}
+            >
+              {tab.label}
+              {tab.badge && (
+                <span style={{
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  color: '#ffffff',
+                  fontSize: '9px',
+                  fontWeight: '500',
+                  padding: '1px 6px',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}>
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="hidden md:flex items-center gap-4">
-        <div className="flex flex-col items-end">
-          <span className="text-white text-xs font-semibold">RR.HH. Usuario</span>
-          <span className="text-conaf-300 text-[10px] uppercase tracking-wider">Administrador de Personal</span>
+      {/* User */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ color: '#ffffff', fontSize: '11px', fontWeight: '500', lineHeight: 1 }}>Admin Usuario</div>
+          <div style={{ color: 'rgba(165, 214, 167, 0.8)', fontSize: '8px', fontWeight: '500', letterSpacing: '0.1em', marginTop: '3px' }}>RR.HH. Central</div>
         </div>
-        <div className="w-8 h-8 rounded-full bg-conaf-700 border border-conaf-600 flex items-center justify-center text-white text-xs font-bold shadow-inner">
-          AD
-        </div>
+        <div style={{
+          width: '32px', height: '32px',
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          border: '1.5px solid rgba(255,255,255,0.15)',
+          borderRadius: '50%',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#ffffff',
+          fontWeight: '500',
+          fontSize: '10px',
+        }}>AD</div>
       </div>
     </nav>
   );

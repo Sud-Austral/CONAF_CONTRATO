@@ -7,9 +7,9 @@ import EvolucionRemuneracion from './charts/EvolucionRemuneracion';
 import TopCargos from './charts/TopCargos';
 
 const CardChart = ({ title, children }) => (
-  <div className="bg-white p-6 rounded-[22px] shadow-card border border-conaf-100/50 hover:shadow-xl hover:border-conaf-200 transition-all duration-300">
-    <h3 className="text-sm font-bold font-display text-conaf-800 mb-6 flex items-center gap-3">
-      <span className="w-1.5 h-4 bg-conaf-500 rounded-full" />
+  <div className="bg-white p-6 rounded-[22px] shadow-sm border border-neutral-200 hover:shadow-md transition-all duration-300">
+    <h3 className="text-sm font-bold font-display text-neutral-800 mb-6 flex items-center gap-3">
+      <span className="w-1.5 h-4 bg-primary rounded-full" />
       {title}
     </h3>
     <div className="h-[300px] w-full">

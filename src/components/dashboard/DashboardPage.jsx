@@ -4,6 +4,7 @@ import { useFilters } from '../../hooks/useFilters';
 import FilterSidebar from '../layout/FilterSidebar';
 import KpiRow from './KpiRow';
 import ChartsGrid from './ChartsGrid';
+import LatestPeriodStats from './LatestPeriodStats';
 import SectionTitle from '../common/SectionTitle';
 
 const DashboardPage = () => {
@@ -31,13 +32,13 @@ const DashboardPage = () => {
           />
           
           <div className="flex items-center gap-3">
-            <div className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest ${filteredRows.length > 0 ? 'bg-conaf-100 text-conaf-700' : 'bg-red-100 text-red-700'}`}>
+            <div className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest ${filteredRows.length > 0 ? 'bg-conaf-300 text-conaf-700' : 'bg-red-100 text-red-700'}`}>
               Estado: {filteredRows.length > 0 ? 'Datos Activos' : 'Sin Resultados'}
             </div>
             {!sidebarOpen && (
               <button 
                 onClick={() => setSidebarOpen(true)}
-                className="md:hidden flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm font-bold text-xs text-conaf-600 border border-conaf-100 hover:bg-conaf-50"
+                className="md:hidden flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm font-bold text-xs text-conaf-600 border border-conaf-300 hover:bg-conaf-50"
               >
                 Filtros
               </button>
@@ -47,7 +48,7 @@ const DashboardPage = () => {
 
         {filteredRows.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 bg-white rounded-[20px] shadow-sm border border-gray-100">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-6">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 mb-6">
               <span className="text-3xl font-display">?</span>
             </div>
             <h2 className="text-xl font-bold font-display text-gray-800 mb-2">Sin resultados para los filtros seleccionados</h2>
@@ -63,6 +64,7 @@ const DashboardPage = () => {
           <>
             <KpiRow filteredRows={filteredRows} />
             <ChartsGrid filteredRows={filteredRows} />
+            <LatestPeriodStats filteredRows={filteredRows} />
           </>
         )}
       </div>

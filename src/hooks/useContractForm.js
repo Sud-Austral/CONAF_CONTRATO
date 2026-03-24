@@ -56,10 +56,10 @@ export function useContractForm(employee) {
   const isValid = useMemo(() => {
     return (
       hasSignature && 
-      signer.name.trim().length > 0 && 
-      signer.role.trim().length > 0 &&
-      formData.tipo_cargo?.trim().length > 0 &&
-      formData.tipo_de_contrato?.trim().length > 0
+      String(signer.name || '').trim().length > 0 && 
+      String(signer.role || '').trim().length > 0 &&
+      String(formData.tipo_cargo || '').trim().length > 0 &&
+      String(formData.tipo_de_contrato || '').trim().length > 0
     );
   }, [hasSignature, signer, formData]);
 

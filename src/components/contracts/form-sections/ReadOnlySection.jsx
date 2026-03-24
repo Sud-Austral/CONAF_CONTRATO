@@ -3,7 +3,7 @@ import { fmtRut } from '../../../utils/formatters';
 
 const InfoField = ({ label, value }) => (
   <div className="flex flex-col gap-1.5 p-3.5 bg-white border border-gray-100 rounded-xl shadow-sm">
-    <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider font-body leading-none">{label}</span>
+    <span className="text-[10px] uppercase font-bold text-gray-600 tracking-wider font-body leading-none">{label}</span>
     <span className="text-sm font-bold text-conaf-900 truncate">{value || '—'}</span>
   </div>
 );

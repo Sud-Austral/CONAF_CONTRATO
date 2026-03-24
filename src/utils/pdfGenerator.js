@@ -1,165 +1,169 @@
 import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
 import { fmtCLP, fmtFecha } from "./formatters";
 
 /**
- * Genera el archivo PDF del contrato modificado
+ * Genera el archivo PDF del contrato oficial siguiendo la estructura legal chilena
  */
 export async function generateContractPdf({ 
   employee, 
   formData, 
-  signatureDataUrl, 
+  signaturePayload, 
   signerName, 
   signerRole, 
-  signDate 
+  signDate,
+  isPreview = false 
 }) {
   const doc = new jsPDF({
     orientation: "p",
     unit: "mm",
-    format: "letter", // Letter size: 215.9 x 279.4 mm
+    format: "letter", 
   });
 
-  const green_primary = "#1e4d1e";
-  const green_soft = "#2d6a2d";
-  const gray_text = "#1f2937";
+  const primary_color = "#1B5E20"; // Verde institucional
+  const text_color = "#1A1A1A"; 
   const page_width = doc.internal.pageSize.getWidth();
-  const margin = 20;
+  const margin = 25;
+  const content_width = page_width - (margin * 2);
+  let currentY = 25;
 
-  // Header Title
-  doc.setTextColor(green_soft);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.text("CORPORACIÓN NACIONAL FORESTAL — CONAF", page_width / 2, 20, { align: "center" });
+  // Helpers de formato
+  const addText = (text, size = 10, font = "helvetica", style = "normal", align = "left", color = text_color) => {
+    doc.setFont(font, style);
+    doc.setFontSize(size);
+    doc.setTextColor(color);
+    const splitText = doc.splitTextToSize(text, content_width);
+    doc.text(splitText, align === "center" ? page_width / 2 : margin, currentY, { align });
+    currentY += (splitText.length * (size * 0.5)) + 4;
+  };
 
-  doc.setTextColor(gray_text);
-  doc.setFontSize(11);
-  doc.setFont("helvetica", "normal");
-  doc.text("MODIFICACIÓN DE CONTRATO DE TRABAJO", page_width / 2, 28, { align: "center" });
+  const addTitle = (text) => {
+    currentY += 4;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(primary_color);
+    doc.text(text, margin, currentY);
+    currentY += 8;
+  };
 
-  // Divider Line
-  doc.setDrawColor(green_soft);
-  doc.setLineWidth(0.5);
-  doc.line(margin, 32, page_width - margin, 32);
-
-  const now = new Date();
-  const diaS = now.getDate();
-  const mesS = now.toLocaleDateString('es-CL', { month: 'long' });
-  const anyoS = now.getFullYear();
-  doc.setFontSize(9);
-  doc.text(`Santiago, ${diaS} de ${mesS} de ${anyoS}`, margin, 40);
-  doc.text(`N° DOC-${Math.floor(Math.random() * 900000) + 100000}`, page_width - margin, 40, { align: "right" });
-
-  // I. ANTECEDENTES DEL FUNCIONARIO
-  autoTable(doc, {
-    startY: 48,
-    margin: { left: margin, right: margin },
-    head: [["I. ANTECEDENTES DEL FUNCIONARIO", ""]],
-    body: [
-      ["RUT", employee.rut],
-      ["Nombre Completo", employee.nombrecompleto_x],
-      ["Sexo", employee.sexo === "M" ? "Masculino" : "Femenino"],
-      ["Tramo Etario", employee.age_label || "S/I"],
-    ],
-    theme: "grid",
-    headStyles: { fillColor: green_primary, textColor: "#ffffff", fontSize: 10, halign: "left" },
-    bodyStyles: { fontSize: 9, textColor: gray_text },
-    columnStyles: { 0: { fontStyle: "bold", width: 50 }, 1: { width: "auto" } },
-  });
-
-  // II. TÉRMINOS DEL CONTRATO
-  const contractFields = [
-    { label: "Organismo", field: "organismo_nombre" },
-    { label: "Año", field: "anyo" },
-    { label: "Mes", field: "mes" },
-    { label: "Tipo de Cargo", field: "tipo_cargo" },
-    { label: "Tipo de Contrato", field: "tipo_de_contrato" },
-    { label: "Tipo de Pago", field: "tipo_pago" },
-    { label: "Fecha de Ingreso", field: "fecha_ingreso" },
-    { label: "Fecha de Término", field: "fecha_termino" },
-  ];
-
-  const contractBody = contractFields.map(({ label, field }) => {
-    const original = employee[field] || "—";
-    const nuevo = formData[field] || "—";
-    const isDifferent = String(original) !== String(nuevo);
-    return {
-      content: [label, original, nuevo],
-      styles: isDifferent ? { fillColor: "#fff9c4" } : {}, // Highlight changed rows in light yellow
-    };
-  });
-
-  autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 10,
-    margin: { left: margin, right: margin },
-    head: [["II. TÉRMINOS DEL CONTRATO", "Valor Anterior", "Valor Nuevo"]],
-    body: contractBody.map(b => b.content),
-    didParseCell: (data) => {
-      if (data.section === 'body') {
-        const idx = data.row.index;
-        if (contractBody[idx].styles.fillColor) {
-          data.cell.styles.fillColor = contractBody[idx].styles.fillColor;
-        }
-      }
-    },
-    theme: "grid",
-    headStyles: { fillColor: green_primary, textColor: "#ffffff", fontSize: 10 },
-    bodyStyles: { fontSize: 9, textColor: gray_text },
-    columnStyles: { 0: { fontStyle: "bold", width: 50 } },
-  });
-
-  // III. REMUNERACIONES
-  autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 10,
-    margin: { left: margin, right: margin },
-    head: [["III. REMUNERACIONES", "Monto Mensual"]],
-    body: [
-      ["Remuneración Bruta", fmtCLP(formData.remuneracionbruta_mensual)],
-      ["Remuneración Líquida", fmtCLP(formData.remuliquida_mensual)],
-      ["Sueldo Base", fmtCLP(formData.base)],
-    ],
-    theme: "grid",
-    headStyles: { fillColor: green_primary, textColor: "#ffffff", fontSize: 10 },
-    bodyStyles: { fontSize: 9, textColor: gray_text },
-    columnStyles: { 0: { fontStyle: "bold", width: 50 }, 1: { halign: "right" } },
-  });
-
-  // IV. CLÁUSULA LEGAL
-  const clauseY = doc.lastAutoTable.finalY + 15;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(green_primary);
-  doc.text("IV. CLÁUSULA LEGAL", margin, clauseY);
-  
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(gray_text);
-  const legalText = `Se deja constancia de que la presente modificación rige a partir de la fecha de firma de este documento, manteniendo plena vigencia el resto de las cláusulas del contrato original. El funcionario declara conocer y aceptar los términos anteriormente descritos en cumplimiento de la normativa institucional vigente de la Corporación Nacional Forestal.`;
-  const splitText = doc.splitTextToSize(legalText, page_width - (margin * 2));
-  doc.text(splitText, margin, clauseY + 6, { align: "justify" });
-
-  // V. FIRMA DEL RESPONSABLE
-  const signatureY = clauseY + 30;
-  if (signatureDataUrl) {
-    doc.addImage(signatureDataUrl, "PNG", margin + 10, signatureY, 60, 25);
+  // Watermark para Borrador
+  if (isPreview) {
+    doc.setTextColor(240, 240, 240);
+    doc.setFontSize(60);
+    doc.setFont("helvetica", "bold");
+    doc.text("BORRADOR", page_width / 2, 140, { align: "center", angle: 45 });
   }
-  
-  doc.line(margin, signatureY + 28, margin + 80, signatureY + 28);
-  doc.setFont("helvetica", "bold");
-  doc.text(signerName || "___________________________", margin, signatureY + 33);
-  doc.setFont("helvetica", "normal");
-  doc.text(signerRole || "Resguardar Cargo", margin, signatureY + 38);
-  doc.text(`Fecha de Firma: ${fmtFecha(signDate)}`, margin, signatureY + 43);
 
-  // Footer
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pageCount; i++) {
+  // HEADER INSTITUCIONAL
+  doc.setDrawColor(primary_color);
+  doc.setLineWidth(0.8);
+  doc.line(margin, 15, page_width - margin, 15);
+  
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(primary_color);
+  doc.text("CONTRATO DE TRABAJO", page_width / 2, 22, { align: "center" });
+  currentY = 35;
+
+  // INTRODUCCIÓN
+  const ciudad = employee.organismo_nombre?.split(' ')[0] || "Santiago";
+  const fechaHoy = new Date().toLocaleDateString('es-CL');
+  
+  addText(`En ${ciudad}, a ${fechaHoy}, entre:`, 10);
+  
+  const introEmpresa = `CORPORACIÓN NACIONAL FORESTAL (CONAF), RUT 61.300.200-K, representada por don/doña ${signerName || '___________________________'}, en adelante el "Empleador";`;
+  addText(introEmpresa, 10, "helvetica", "bold");
+
+  addText("y", 10, "helvetica", "normal", "center");
+
+  const introTrabajador = `${employee.nombrecompleto_x}, cédula de identidad N° ${employee.rut}, domiciliado en Domicilio Registrado, en adelante el "Trabajador";`;
+  addText(introTrabajador, 10, "helvetica", "bold");
+
+  addText("se ha convenido el siguiente contrato de trabajo:", 10);
+
+  // CLÁUSULAS
+  addTitle("PRIMERO: NATURALEZA DE LOS SERVICIOS");
+  addText(`El Trabajador se obliga a prestar servicios como ${formData.tipo_cargo || employee.tipo_cargo}, realizando las funciones propias del cargo, así como aquellas que le encomiende el Empleador relacionadas con su labor institucional en el departamento de ${employee.organismo_nombre || 'CONAF'}.`, 10);
+
+  addTitle("SEGUNDO: JORNADA DE TRABAJO");
+  addText(`La jornada ordinaria de trabajo será de 42 horas semanales, distribuidas de la siguiente forma:`, 10);
+  addText(`• Lunes a Jueves: 09:00 a 18:00 horas (1 h colación).`, 9);
+  addText(`• Viernes: 09:00 a 17:00 horas (1 h colación).`, 9);
+  addText(`El tiempo destinado a colación no se considerará trabajado.`, 9);
+
+  addTitle("TERCERO: REMUNERACIÓN");
+  addText(`El Empleador pagará al Trabajador una remuneración mensual de:`, 10);
+  addText(`• Sueldo Base: ${fmtCLP(formData.base || (formData.remuneracionbruta_mensual * 0.7))}`, 10, "helvetica", "bold");
+  addText(`• Remuneración Bruta Total: ${fmtCLP(formData.remuneracionbruta_mensual)}`, 10, "helvetica", "bold");
+  addText(`Las remuneraciones se pagarán dentro de los primeros 5 días hábiles del mes siguiente al trabajado mediante transferencia bancaria.`, 9);
+
+  addTitle("CUARTO: DESCUENTOS LEGALES");
+  addText(`De la remuneración se efectuarán los descuentos legales correspondientes a cotizaciones previsionales (AFP), salud (FONASA/ISAPRE), seguro de cesantía e impuestos de segunda categoría si corresponde.`, 9);
+
+  addTitle("QUINTO: DURACIÓN DEL CONTRATO");
+  const diasPlazo = formData.tipo_de_contrato === 'Contratohonorarios' ? 'Plazo Fijo' : 'Indefinido';
+  addText(`Este contrato tendrá una duración: ${diasPlazo}. Vigente desde la fecha de firma electrónica.`, 10, "helvetica", "bold");
+
+  // Salto de página si es necesario
+  if (currentY > 220) {
+    doc.addPage();
+    currentY = 25;
+  }
+
+  addTitle("SEXTO: LUGAR DE TRABAJO");
+  addText(`El Trabajador prestará servicios en las dependencias de ${employee.organismo_nombre || 'la Corporación'} o en modalidad según requerimiento institucional.`, 9);
+
+  addTitle("SÉPTIMO: FERIADO LEGAL");
+  addText(`El Trabajador tendrá derecho a feriado anual conforme a la ley (15 días hábiles remunerados), según lo establecido en el Código del Trabajo de Chile.`, 9);
+
+  addTitle("OCTAVO: OBLIGACIONES DEL TRABAJADOR");
+  addText(`El Trabajador se compromete a: cumplir sus funciones de manera diligente, respetar el reglamento interno de higiene y seguridad de la Corporación y mantener absoluta reserva de la información estratégica institucional.`, 9);
+
+  addTitle("NOVENO: TÉRMINO DEL CONTRATO");
+  addText(`El presente instrumento podrá terminar por cualquiera de las causales establecidas en los artículos 159, 160 y 161 del Código del Trabajo.`, 9);
+
+  addTitle("DÉCIMO: LEGISLACIÓN APLICABLE");
+  addText(`Este contrato se rige íntegramente por las disposiciones del Código del Trabajo de la República de Chile.`, 9);
+
+  // FIRMAS
+  currentY += 15;
+  doc.setDrawColor(200);
+  doc.setLineWidth(0.5);
+  doc.line(margin, currentY, margin + 70, currentY); // Linea Empleador
+  doc.line(page_width - margin - 70, currentY, page_width - margin, currentY); // Linea Trabajador
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("EMPLEADOR (CONAF)", margin, currentY + 5);
+  doc.text("TRABAJADOR", page_width - margin, currentY + 5, { align: "right" });
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text(String(signerName || "Representante"), margin, currentY + 10);
+  doc.text(employee.nombrecompleto_x, page_width - margin, currentY + 10, { align: "right" });
+
+  // EVIDENCIA DIGITAL (FES)
+  if (signaturePayload && !isPreview) {
+    currentY += 25;
+    doc.setFillColor(245, 247, 245);
+    doc.rect(margin, currentY, content_width, 22, "F");
+    doc.setFont("courier", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(100);
+    doc.text(`EVIDENCIA DIGITAL (LEY 19.799)`, margin + 5, currentY + 6);
+    doc.setFont("courier", "normal");
+    doc.text(`ID TRANSACCIÓN: ${signaturePayload.document.hash.slice(0, 32)}...`, margin + 5, currentY + 11);
+    doc.text(`IP ORIGEN: ${signaturePayload.evidence.ip} | TIMESTAMP: ${signaturePayload.evidence.timestamp}`, margin + 5, currentY + 16);
+  }
+
+  // FOOTER
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.text(`Página ${i} de ${pageCount} — Documento generado electrónicamente — CONAF Chile`, page_width / 2, doc.internal.pageSize.getHeight() - 10, { align: "center" });
+    doc.text(`Página ${i} de ${totalPages} — Documento Electrónico Generado por Sistema Gestión Personal CONAF`, page_width/2, 270, { align: "center" });
   }
 
-  // Save the PDF
-  const filename = `Contrato_CONAF_${employee.rut}_${new Date().toISOString().split('T')[0]}.pdf`;
+  const filename = `${isPreview ? 'Draft_' : 'Contrato_'}${employee.rut}_${new Date().getTime()}.pdf`;
   doc.save(filename);
 }

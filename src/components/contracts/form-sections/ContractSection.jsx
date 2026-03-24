@@ -6,10 +6,10 @@ const InputField = ({ label, name, value, onChange, type = "text", options = [],
   const isChanged = String(value) !== String(original);
   
   return (
-    <div className={`flex flex-col gap-1.5 p-3.5 rounded-xl transition-all border ${isChanged ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100 hover:border-conaf-200'}`}>
+    <div className={`flex flex-col gap-1.5 p-3.5 rounded-xl transition-all border ${isChanged ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100 hover:border-conaf-400'}`}>
       <div className="flex items-center justify-between">
-        <label className="text-[10px] uppercase font-bold text-gray-500 tracking-wider font-body leading-none">{label}</label>
-        {isChanged && <span className="text-[9px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-full uppercase">Editado</span>}
+        <label className="text-[10px] uppercase font-bold text-gray-700 tracking-wider font-body leading-none">{label}</label>
+        {isChanged && <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-full uppercase">Editado</span>}
       </div>
       
       {type === 'select' ? (
@@ -28,7 +28,7 @@ const InputField = ({ label, name, value, onChange, type = "text", options = [],
           name={name} 
           value={value || ''} 
           onChange={(e) => onChange(name, e.target.value)}
-          className="text-sm font-bold text-conaf-900 bg-transparent focus:outline-none focus:ring-1 focus:ring-gold rounded transition-all placeholder:text-gray-300"
+          className="text-sm font-bold text-conaf-900 bg-transparent focus:outline-none focus:ring-1 focus:ring-gold rounded transition-all placeholder:text-gray-600"
           placeholder={`Ingrese ${label.toLowerCase()}...`}
         />
       )}

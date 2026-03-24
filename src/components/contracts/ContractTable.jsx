@@ -63,7 +63,7 @@ const ContractTable = ({ employees, onOpenContract }) => {
                 <div className="flex items-center gap-2 font-body font-bold">Contrato <SortIcon columnKey="tipo_de_contrato" /></div>
               </th>
               <th className="px-6 py-4 w-[180px] cursor-pointer group hover:bg-conaf-700 transition-colors" onClick={() => handleSort('remuneracionbruta_mensual')}>
-                <div className="flex items-center gap-2 font-body font-bold text-right justify-end">R. Bruta <SortIcon columnKey="remuneracionbruta_mensual" /></div>
+                <div className="flex items-center gap-2 font-body font-bold text-right justify-end">R. Bruta (Prom) <SortIcon columnKey="remuneracionbruta_mensual" /></div>
               </th>
               <th className="px-6 py-4 w-[100px] text-center font-body font-bold">Acciones</th>
             </tr>
@@ -72,7 +72,7 @@ const ContractTable = ({ employees, onOpenContract }) => {
             {paginatedData.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-6 py-24 text-center">
-                   <div className="flex flex-col items-center gap-4 text-gray-400">
+                   <div className="flex flex-col items-center gap-4 text-gray-600">
                      <span className="text-4xl">🔎</span>
                      <p className="font-bold text-gray-500">No se encontraron funcionarios activos que coincidan.</p>
                    </div>
@@ -84,11 +84,11 @@ const ContractTable = ({ employees, onOpenContract }) => {
                   key={row.rut} 
                   className={`group hover:bg-conaf-50 transition-colors animate-in fade-in duration-300 ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}
                 >
-                  <td className="px-6 py-4 text-sm font-bold text-conaf-800 font-mono tracking-tighter whitespace-nowrap bg-conaf-50/10 border-r border-gray-100 group-hover:bg-conaf-100 transition-colors">{fmtRut(row.rut)}</td>
+                  <td className="px-6 py-4 text-sm font-bold text-conaf-800 font-mono tracking-tighter whitespace-nowrap bg-conaf-50/10 border-r border-gray-100 group-hover:bg-conaf-300 transition-colors">{fmtRut(row.rut)}</td>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-gray-800 leading-tight group-hover:text-conaf-800 transition-colors">{row.nombrecompleto_x}</span>
-                      <span className="text-[10px] text-gray-400 uppercase tracking-tighter mt-0.5">{row.sexo === 'M' ? 'Masculino' : 'Femenino'}</span>
+                      <span className="text-[10px] text-gray-600 uppercase tracking-tighter mt-0.5">{row.sexo === 'M' ? 'Masculino' : 'Femenino'}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-xs font-medium text-gray-600 truncate italic">{truncate(row.tipo_cargo, 35)}</td>
@@ -107,7 +107,7 @@ const ContractTable = ({ employees, onOpenContract }) => {
                   <td className="px-6 py-4 text-center">
                     <button 
                       onClick={() => onOpenContract(row)}
-                      className="p-2 text-conaf-600 hover:bg-conaf-100 hover:text-conaf-800 rounded-xl transition-all shadow-sm hover:scale-110 active:scale-95 group/btn border border-conaf-200 bg-white"
+                      className="p-2 text-conaf-600 hover:bg-conaf-300 hover:text-conaf-800 rounded-xl transition-all shadow-sm hover:scale-110 active:scale-95 group/btn border border-conaf-400 bg-white"
                       title="Administrar Contrato"
                     >
                       <FileEdit size={18} className="group-hover/btn:rotate-12 transition-transform" />
@@ -121,8 +121,8 @@ const ContractTable = ({ employees, onOpenContract }) => {
       </div>
 
       {/* Footer Paginación */}
-      <div className="h-14 bg-conaf-50 flex items-center justify-between px-6 border-t border-conaf-200 shrink-0 z-10 shadow-sm">
-        <div className="text-xs font-bold text-text-muted uppercase tracking-wider">
+      <div className="h-14 bg-conaf-50 flex items-center justify-between px-6 border-t border-conaf-400 shrink-0 z-10 shadow-sm">
+        <div className="text-xs font-bold text-text-main uppercase tracking-wider">
           Mostrando <span className="text-conaf-700 font-display">{(currentPage-1)*pageSize + (paginatedData.length > 0 ? 1 : 0)} – {(currentPage-1)*pageSize + paginatedData.length}</span> de <span className="text-conaf-700 font-display">{sortedData.length}</span> registros
         </div>
         
@@ -130,7 +130,7 @@ const ContractTable = ({ employees, onOpenContract }) => {
           <button 
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => p - 1)}
-            className="p-1.5 rounded-lg border border-conaf-200 hover:bg-white enabled:active:scale-90 transition-all disabled:opacity-30 text-conaf-800 bg-conaf-50/50"
+            className="p-1.5 rounded-lg border border-conaf-400 hover:bg-white enabled:active:scale-90 transition-all disabled:opacity-30 text-conaf-800 bg-conaf-50/50"
           >
             <ChevronLeft size={18} />
           </button>
@@ -149,7 +149,7 @@ const ContractTable = ({ employees, onOpenContract }) => {
                   <button 
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`min-w-[32px] h-8 rounded-lg text-xs font-bold transition-all border ${currentPage === pageNum ? 'bg-conaf-700 text-white border-conaf-700 shadow-sm' : 'bg-white hover:bg-conaf-100 text-conaf-800 border-conaf-200'}`}
+                    className={`min-w-[32px] h-8 rounded-lg text-xs font-bold transition-all border ${currentPage === pageNum ? 'bg-conaf-700 text-white border-conaf-700 shadow-sm' : 'bg-white hover:bg-conaf-300 text-conaf-800 border-conaf-400'}`}
                   >
                     {pageNum}
                   </button>
@@ -160,7 +160,7 @@ const ContractTable = ({ employees, onOpenContract }) => {
           <button 
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage(p => p + 1)}
-            className="p-1.5 rounded-lg border border-conaf-200 hover:bg-white enabled:active:scale-90 transition-all disabled:opacity-30 text-conaf-800 bg-conaf-50/50"
+            className="p-1.5 rounded-lg border border-conaf-400 hover:bg-white enabled:active:scale-90 transition-all disabled:opacity-30 text-conaf-800 bg-conaf-50/50"
           >
             <ChevronRight size={18} />
           </button>

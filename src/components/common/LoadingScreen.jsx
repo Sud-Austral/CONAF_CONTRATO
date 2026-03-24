@@ -5,7 +5,7 @@ const LoadingScreen = () => {
   return (
     <div className="fixed inset-0 bg-bg flex flex-col items-center justify-center p-6 z-[9999]">
       <div className="relative mb-8 group animate-pulse">
-        <div className="w-24 h-24 bg-white rounded-3xl shadow-lg border border-conaf-200 flex items-center justify-center text-conaf-600">
+        <div className="w-24 h-24 bg-white rounded-3xl shadow-lg border border-conaf-400 flex items-center justify-center text-conaf-600">
           <Trees size={64} strokeWidth={1} />
         </div>
         <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-conaf-500 rounded-full flex items-center justify-center text-white border-4 border-bg shadow-sm spin-reverse">
@@ -14,7 +14,7 @@ const LoadingScreen = () => {
       </div>
       
       <h1 className="text-2xl font-bold font-display text-conaf-800 mb-2 tracking-tight">Cargando datos...</h1>
-      <p className="text-text-muted text-sm text-center max-w-xs leading-relaxed">
+      <p className="text-text-main text-sm text-center max-w-xs leading-relaxed">
         Estamos recuperando y procesando la información de personal institucional de CONAF.
       </p>
 

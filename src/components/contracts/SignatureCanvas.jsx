@@ -93,7 +93,7 @@ const SignatureCanvas = forwardRef(({ onDraw }, ref) => {
         
         <div className="absolute top-4 right-4 flex gap-2">
           {!isEmpty && (
-            <div className="px-3 py-1 bg-conaf-100/80 backdrop-blur-sm rounded-full text-conaf-700 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm animate-in zoom-in duration-300">
+            <div className="px-3 py-1 bg-conaf-300/80 backdrop-blur-sm rounded-full text-conaf-700 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-sm animate-in zoom-in duration-300">
               <CheckCircle2 size={12} strokeWidth={3} />
               Firma Detectada
             </div>
@@ -110,7 +110,7 @@ const SignatureCanvas = forwardRef(({ onDraw }, ref) => {
 
         {isEmpty && (
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center pointer-events-none opacity-40 select-none">
-            <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Escriba su firma aquí</p>
+            <p className="text-gray-600 font-bold uppercase tracking-widest text-[10px]">Escriba su firma aquí</p>
           </div>
         )}
       </div>

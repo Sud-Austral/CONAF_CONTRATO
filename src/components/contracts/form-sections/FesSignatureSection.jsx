@@ -83,10 +83,10 @@ const FesSignatureSection = ({ documentInfo, userInfo, onSignSuccess }) => {
           <p className="mb-3">
             <strong>CLÁUSULA SEGUNDA:</strong> La jornada ordinaria de trabajo será de 44 horas semanales repartidas de Lunes a Viernes...
           </p>
-          <p className="mb-3 italic text-gray-400">
+          <p className="mb-3 italic text-gray-600">
             [... Contenido omitido para brevedad de la maqueta ...]
           </p>
-          <p className="mt-6 text-[10px] text-center text-gray-400">
+          <p className="mt-6 text-[10px] text-center text-gray-600">
             Este documento está listo para ser validado legalmente bajo la Ley 19.799.
           </p>
 
@@ -112,7 +112,7 @@ const FesSignatureSection = ({ documentInfo, userInfo, onSignSuccess }) => {
             <label htmlFor="acceptance-checkbox" className="text-sm font-bold text-conaf-900 leading-tight cursor-pointer selection:bg-transparent">
               Declaro que he leído y acepto el contenido del documento.
             </label>
-            <p className="text-[11px] text-gray-500 leading-normal">
+            <p className="text-[11px] text-gray-700 leading-normal">
               Acepto firmar este documento mediante <span className="font-bold text-conaf-700">Firma Electrónica Simple (FES)</span>. 
               Entiendo que este acto tiene validez legal plena bajo la Ley 19.799 en Chile.
             </p>
@@ -129,7 +129,7 @@ const FesSignatureSection = ({ documentInfo, userInfo, onSignSuccess }) => {
             relative w-full py-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] overflow-hidden
             ${(isAccepted && !signaturePayload)
               ? 'bg-conaf-700 text-white shadow-lg shadow-conaf-900/20 hover:bg-conaf-800' 
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300 opacity-60'
+              : 'bg-gray-200 text-gray-600 cursor-not-allowed border border-gray-300 opacity-60'
             }
           `}
         >
@@ -168,7 +168,7 @@ const FesSignatureSection = ({ documentInfo, userInfo, onSignSuccess }) => {
                 <Terminal size={16} />
                 <span className="text-[10px] uppercase font-bold tracking-widest">Metadata de Firma (JSON Payload)</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/40 uppercase">
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/70 uppercase">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
                 Válido para Middleware
               </div>
@@ -179,7 +179,7 @@ const FesSignatureSection = ({ documentInfo, userInfo, onSignSuccess }) => {
             </pre>
 
             <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-[10px]">
-              <div className="flex items-center gap-4 text-white/50">
+              <div className="flex items-center gap-4 text-white/80">
                 <div className="flex items-center gap-1">
                   <Fingerprint size={12} />
                   FES-CHILE-V1

@@ -59,10 +59,23 @@ export function enrichRows(rows) {
     ...row,
     mesNum: MES_ORDER[row.mes] || 0,
     anyo: row.anyo ? parseInt(row.anyo, 10) : null,
-    // Aseguramos que los campos de remuneración sean numéricos y manejamos nulos
+    // Según el usuario, la columna 'base' es en realidad el Tipo de Contrato
+    tipo_de_contrato: row.base || row.tipo_de_contrato || '—',
+    
+    // Normalizar Sexo para legibilidad
+    sexo: (row.sexo || '').toString().toLowerCase().trim() === 'hombre' ? 'Hombre' : 
+          (row.sexo || '').toString().toLowerCase().trim() === 'mujer' ? 'Mujer' : 
+          'Sin determinar',
+
+    // Normalizar Rango Etario
+    age_label: !row.age_label || String(row.age_label).toLowerCase() === 'nan' ? 'Sin determinar' : row.age_label,
+
+    // Aseguramos que los campos de remuneración sean numéricos
     remuneracionbruta_mensual: row.remuneracionbruta_mensual != null ? parseFloat(row.remuneracionbruta_mensual) : null,
     remuliquida_mensual: row.remuliquida_mensual != null ? parseFloat(row.remuliquida_mensual) : null,
-    base: row.base != null ? parseFloat(row.base) : null,
+    // Evitamos pisar el sueldo base numérico si existiera otra columna, 
+    // pero si el usuario dice que 'base' es contrato, 'base' ya no es un monto
+    base_monto: !isNaN(parseFloat(row.base)) ? parseFloat(row.base) : null,
   }));
 }
 
@@ -106,6 +119,8 @@ export async function fetchData() {
     
     const parsed = parseDataJson(rawData);
     console.log("Datos normalizados:", parsed.length, "filas");
+    console.log("Muestra de los primeros 10 registros (Crudos):");
+    console.table(parsed.slice(0, 10));
     
     return enrichRows(parsed);
   } catch (error) {

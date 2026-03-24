@@ -7,7 +7,7 @@ const SalaryField = ({ label, name, value, onChange, original }) => {
   return (
     <div className={`flex flex-col gap-1.5 p-4 rounded-2xl transition-all border ${isChanged ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-gray-100'}`}>
       <div className="flex items-center justify-between mb-1">
-        <label className="text-[11px] uppercase font-bold text-gray-500 tracking-wider font-body">{label}</label>
+        <label className="text-[11px] uppercase font-bold text-gray-700 tracking-wider font-body">{label}</label>
         {isChanged && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-full">Actualizado</span>}
       </div>
       
@@ -20,7 +20,7 @@ const SalaryField = ({ label, name, value, onChange, original }) => {
           onChange={(e) => onChange(name, parseFloat(e.target.value) || 0)}
           className="w-full pl-5 py-1 text-lg font-display font-bold text-conaf-900 bg-transparent focus:outline-none focus:ring-b-2 focus:ring-emerald-400 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        <div className="text-[10px] font-bold text-gray-400 mt-1 flex justify-between items-center group-focus-within/input:text-emerald-600 transition-colors">
+        <div className="text-[10px] font-bold text-gray-600 mt-1 flex justify-between items-center group-focus-within/input:text-emerald-700 transition-colors">
           <span>Vista Previa:</span>
           <span>{fmtCLP(value)}</span>
         </div>

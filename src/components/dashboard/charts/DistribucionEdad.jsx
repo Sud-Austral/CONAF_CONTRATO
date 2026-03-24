@@ -29,7 +29,7 @@ const DistribucionEdad = ({ rows }) => {
         />
         <Tooltip 
           contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', padding: '12px' }}
-          labelStyle={{ fontWeight: 'bold', color: '#1e4d1e', marginBottom: '8px' }}
+          labelStyle={{ fontWeight: 'bold', color: '#064e3b', marginBottom: '8px' }}
         />
         <Legend 
           verticalAlign="top" 
@@ -39,17 +39,17 @@ const DistribucionEdad = ({ rows }) => {
           wrapperStyle={{ paddingBottom: 15, fontSize: 11, fontWeight: 500 }}
         />
         <Bar 
-          name="Masculino" 
-          dataKey="M" 
-          fill="#2d6a2d" 
+          name="Hombre" 
+          dataKey="Hombre" 
+          fill="#10b981" 
           radius={[4, 4, 0, 0]} 
           barSize={12}
           animationDuration={1500}
         />
         <Bar 
-          name="Femenino" 
-          dataKey="F" 
-          fill="#c8a84b" 
+          name="Mujer" 
+          dataKey="Mujer" 
+          fill="#6366f1" 
           radius={[4, 4, 0, 0]} 
           barSize={12}
           animationDuration={1500}

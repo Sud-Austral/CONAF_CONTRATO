@@ -5,8 +5,9 @@ import {
 import { getDistribucionSexo } from '../../../utils/aggregations';
 
 const COLORS = {
-  "Masculino": '#2d6a2d',
-  "Femenino": '#c8a84b'
+  "Hombre": '#2E7D32', // Primary
+  "Mujer": '#1565C0',  // Secondary
+  "Sin determinar": '#9E9E9E' // Neutral-400
 };
 
 const DistribucionSexo = ({ rows }) => {
@@ -50,7 +51,7 @@ const DistribucionSexo = ({ rows }) => {
             stroke="none"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
+              <Cell key={`cell-${index}`} fill={COLORS[entry.name] || '#ccc'} />
             ))}
           </Pie>
           <Tooltip 
@@ -63,7 +64,7 @@ const DistribucionSexo = ({ rows }) => {
       
       {/* Central label for the donut */}
       <div className="absolute top-[42.5%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-        <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total</p>
+        <p className="text-[10px] uppercase font-bold text-gray-600 tracking-wider">Total</p>
         <p className="text-2xl font-display font-bold text-conaf-900 leading-tight">
           {new Intl.NumberFormat('es-CL').format(total)}
         </p>

@@ -1,32 +1,30 @@
 import React from 'react';
 
-const KpiCard = ({ title, value, icon, trend, unit }) => {
+const KpiCard = ({ title, value, icon, trend, unit, color = 'primary' }) => {
   return (
-    <div className="bg-white p-6 rounded-[20px] shadow-card border-l-4 border-conaf-600 relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className="bg-white p-8 rounded-[32px] shadow-soft border border-neutral-100 border-l-4 border-l-primary relative overflow-hidden group hover:shadow-premium transition-all duration-500 hover:-translate-y-1">
       <div className="flex items-start justify-between relative z-10">
-        <div className="space-y-1.5 flex-1">
-          <h3 className="text-[11px] font-bold uppercase tracking-widest text-text-muted/80">{title}</h3>
+        <div className="space-y-4 flex-1">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-400">{title}</h3>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl lg:text-3xl font-display font-bold text-conaf-900 leading-none truncate block">
+            <span className="text-3xl lg:text-4xl font-data font-black text-neutral-900 leading-none tracking-tight tabular-nums">
               {value}
             </span>
-            {unit && <span className="text-xs font-bold text-conaf-600 uppercase tracking-tighter self-end mb-1 opacity-70">{unit}</span>}
+            {unit && <span className="text-[10px] font-bold text-neutral-300 uppercase tracking-widest self-end mb-1">{unit}</span>}
           </div>
           {trend && (
-            <div className="flex items-center gap-1.5 mt-2">
-              <span className="text-[10px] font-bold bg-conaf-100 text-conaf-700 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+            <div className="flex items-center gap-2 mt-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-soft" />
+              <span className="text-[9px] font-black text-primary-dark uppercase tracking-widest opacity-80">
                 {trend}
               </span>
             </div>
           )}
         </div>
-        <div className="w-12 h-12 bg-conaf-50 rounded-2xl flex items-center justify-center text-conaf-600 shadow-inner group-hover:bg-conaf-100 group-hover:scale-110 transition-all duration-500">
-          {icon}
+        <div className="w-12 h-12 bg-neutral-50/50 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500 shadow-inner">
+          {React.cloneElement(icon, { size: 22, strokeWidth: 1.5 })}
         </div>
       </div>
-      
-      {/* Background Graphic Decoration */}
-      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-conaf-50 rounded-full opacity-50 group-hover:scale-150 transition-all duration-700 pointer-events-none" />
     </div>
   );
 };
