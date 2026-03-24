@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   FileText, 
@@ -14,20 +14,17 @@ import {
  * FesSignatureSection: Implementación de Firma Electrónica Simple (FES) 
  * según Ley 19.799 (Chile).
  * 
- * Basado en aceptación tácita mediante checkbox y registro de evidencia técnica.
+ * Actualizado con el nuevo Sistema de Diseño Institucional.
  */
 const FesSignatureSection = ({ documentInfo, userInfo, onSignSuccess }) => {
   const [isAccepted, setIsAccepted] = useState(false);
   const [signaturePayload, setSignaturePayload] = useState(null);
   const [isSigning, setIsSigning] = useState(false);
 
-  // Simulación de IP para el mockup
   const mockIp = "201.214.34.112";
 
   const handleSign = () => {
     setIsSigning(true);
-    
-    // Simulamos un micro-retraso para la experiencia de usuario (validación de hash/timestamp)
     setTimeout(() => {
       const payload = {
         document: {
@@ -37,160 +34,143 @@ const FesSignatureSection = ({ documentInfo, userInfo, onSignSuccess }) => {
         },
         signer: {
           user_id: userInfo?.id || "user_456",
-          email: userInfo?.email || "responsable@conaf.cl",
-          name: userInfo?.name || "Juan Pérez Maldonado"
+          email: userInfo?.email || "rrhh@conaf.cl",
+          name: userInfo?.name || "Certificador CONAF"
         },
-        signature: {
-          type: "simple",
-          method: "checkbox_acceptance",
-          accepted: true
-        },
+        signature: { type: "simple", method: "checkbox_acceptance", accepted: true },
         evidence: {
           timestamp: new Date().toISOString(),
           ip: mockIp,
           user_agent: navigator.userAgent
         }
       };
-
       setSignaturePayload(payload);
       setIsSigning(false);
-      console.log("Firma Electrónica Simple Generada:", payload);
       if (onSignSuccess) onSignSuccess(payload);
-    }, 800);
+    }, 1200);
   };
 
   return (
-    <div className="flex flex-col gap-6 p-1 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-col gap-8 p-1 animate-in fade-in duration-700">
       
-      {/* 1. Previsualización del Documento (Mock) */}
+      {/* 1. Previsualización del Documento (Vista Ejecutiva) */}
       <div className="relative group">
-        <label className="text-[10px] uppercase font-black text-conaf-600 tracking-widest mb-2 flex items-center gap-2">
-          <FileText size={14} /> 
-          Verificación de Documento Final
+        <label className="text-[9px] uppercase font-black text-neutral-400 tracking-extreme mb-4 flex items-center gap-2">
+          <FileText size={14} className="text-primary-light" /> 
+          Verificación de Contenido Legal
         </label>
         
-        <div className="h-48 w-full bg-white border border-gray-100 rounded-2xl shadow-inner overflow-y-auto scrollbar-thin p-5 text-[11px] text-gray-500 leading-relaxed font-serif relative">
-          <div className="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-white to-transparent pointer-events-none sticky z-10" />
+        <div className="h-44 w-full bg-neutral-50/50 border border-neutral-100 rounded-[28px] shadow-inner overflow-y-auto scrollbar-none p-6 text-[11px] text-neutral-500 leading-relaxed font-serif relative">
+          <div className="absolute top-0 left-0 w-full h-10 bg-gradient-to-b from-white to-transparent pointer-events-none sticky z-10" />
           
-          <h4 className="font-bold text-gray-800 text-center mb-4 text-xs">MINUTA DE CONTRATO DE TRABAJO</h4>
-          <p className="mb-3">
-            En Santiago, a {new Date().toLocaleDateString('es-CL')}, se conviene el siguiente contrato de trabajo entre la 
-            <strong> CORPORACIÓN NACIONAL FORESTAL (CONAF)</strong> y el trabajador individualizado en la sección de antecedentes...
+          <h4 className="font-black text-neutral-900 text-center mb-6 text-xs uppercase tracking-widest">Contrato de Trabajo Institucional</h4>
+          <p className="mb-4">
+            Mediante el presente instrumento, las partes ratifican los términos acordados en el formulario de modificación contractual...
           </p>
-          <p className="mb-3">
-            <strong>CLÁUSULA PRIMERA:</strong> Las funciones que desempeñará el trabajador serán aquellas detalladas en el anexo técnico...
+          <p className="mb-4">
+            El trabajador declara estar en conocimiento de sus nuevas funciones y remuneraciones, las cuales se ajustan a la normativa vigente.
           </p>
-          <p className="mb-3">
-            <strong>CLÁUSULA SEGUNDA:</strong> La jornada ordinaria de trabajo será de 44 horas semanales repartidas de Lunes a Viernes...
-          </p>
-          <p className="mb-3 italic text-gray-600">
-            [... Contenido omitido para brevedad de la maqueta ...]
-          </p>
-          <p className="mt-6 text-[10px] text-center text-gray-600">
-            Este documento está listo para ser validado legalmente bajo la Ley 19.799.
+          <p className="text-[9px] text-center text-neutral-400 mt-8 pb-4">
+            Validado por el Departamento de Recursos Humanos CONAF.
           </p>
 
-          <div className="sticky bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent pointer-events-none flex justify-center items-end pb-2">
-            <ChevronDown className="text-conaf-300 animate-bounce" size={20} />
+          <div className="sticky bottom-0 left-0 w-full h-12 bg-gradient-to-t from-neutral-50 to-transparent pointer-events-none flex justify-center items-end">
+            <ChevronDown className="text-primary-light/50 animate-bounce" size={20} />
           </div>
         </div>
       </div>
 
-      {/* 2. Área de Aceptación Legal */}
-      <div className={`p-5 rounded-3xl transition-all duration-300 border-2 ${isAccepted ? 'bg-conaf-50/50 border-conaf-400 shadow-emerald-50' : 'bg-gray-50 border-gray-100 shadow-sm'}`}>
+      {/* 2. Área de Aceptación Legal (Reubicada y Estilizada) */}
+      <div className={`p-6 rounded-[32px] transition-all duration-500 border-2 ${isAccepted ? 'bg-success/5 border-success/30 shadow-soft' : 'bg-neutral-50 border-neutral-100'}`}>
         <div className="flex items-start gap-4">
-          <div className="relative flex items-center h-5">
+          <div className="flex items-center h-6">
             <input
               id="acceptance-checkbox"
               type="checkbox"
               checked={isAccepted}
               onChange={(e) => setIsAccepted(e.target.checked)}
-              className="w-5 h-5 text-conaf-600 border-gray-300 rounded-lg focus:ring-conaf-500 cursor-pointer accent-conaf-600"
+              className="w-6 h-6 text-primary border-neutral-300 rounded-xl focus:ring-primary cursor-pointer accent-primary"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="acceptance-checkbox" className="text-sm font-bold text-conaf-900 leading-tight cursor-pointer selection:bg-transparent">
-              Declaro que he leído y acepto el contenido del documento.
+          <div className="flex flex-col gap-2">
+            <label htmlFor="acceptance-checkbox" className="text-[13px] font-black text-neutral-900 leading-tight cursor-pointer">
+              He leído y acepto el contenido del documento.
             </label>
-            <p className="text-[11px] text-gray-700 leading-normal">
-              Acepto firmar este documento mediante <span className="font-bold text-conaf-700">Firma Electrónica Simple (FES)</span>. 
-              Entiendo que este acto tiene validez legal plena bajo la Ley 19.799 en Chile.
+            <p className="text-[11px] text-neutral-500 leading-relaxed font-medium">
+              Acepto firmar mediante <span className="text-primary font-bold">Firma Electrónica Simple (FES)</span>. 
+              Este acto posee validez legal plena bajo la <span className="underline decoration-primary/20">Ley 19.799</span>.
             </p>
           </div>
         </div>
       </div>
 
-      {/* 3. Acción de Firma */}
-      <div className="flex flex-col gap-3">
+      {/* 3. Acción de Firma con el nuevo Contraste */}
+      <div className="flex flex-col gap-4">
         <button
           onClick={handleSign}
           disabled={!isAccepted || isSigning || !!signaturePayload}
           className={`
-            relative w-full py-4 rounded-3xl font-bold flex items-center justify-center gap-3 transition-all active:scale-[0.98] overflow-hidden
+            btn-premium relative w-full h-16 rounded-[24px] font-black text-xs uppercase tracking-extreme flex items-center justify-center gap-4 transition-all
             ${(isAccepted && !signaturePayload)
-              ? 'bg-conaf-700 text-white shadow-lg shadow-conaf-900/20 hover:bg-conaf-800' 
-              : 'bg-gray-200 text-gray-600 cursor-not-allowed border border-gray-300 opacity-60'
+              ? 'bg-primary text-white shadow-premium hover:bg-primary-dark' 
+              : 'bg-neutral-200 text-neutral-400 cursor-not-allowed opacity-60'
             }
           `}
         >
           {isSigning ? (
-            <div className="flex items-center gap-3">
-              <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              <span>Procesando Prueba de Evidencia...</span>
-            </div>
+            <>
+              <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin" />
+              <span>Protegiendo Hash...</span>
+            </>
           ) : signaturePayload ? (
-            <div className="flex items-center gap-3 animate-in zoom-in duration-300">
-              <CheckCircle2 size={24} className="text-conaf-300" />
-              <span>Documento Firmado Exitosamente</span>
-            </div>
+            <>
+              <CheckCircle2 size={22} className="text-white animate-in zoom-in" />
+              <span>Documento Certificado</span>
+            </>
           ) : (
             <>
-              <ShieldCheck size={20} />
+              <ShieldCheck size={20} className={isAccepted ? 'animate-bounce-subtle' : ''} />
               <span>Firmar Instrumento Legal</span>
             </>
           )}
         </button>
 
         {signaturePayload && (
-          <div className="flex items-center justify-center gap-2 group cursor-help py-1">
-            <Info size={12} className="text-conaf-500" />
-            <span className="text-[10px] uppercase font-bold text-conaf-500 tracking-widest">Hash de documento validado. Evidencia técnica registrada.</span>
+          <div className="flex items-center justify-center gap-2 animate-in fade-in duration-1000">
+            <Fingerprint size={14} className="text-success" />
+            <span className="text-[9px] uppercase font-black text-success tracking-widest">Evidencia técnica registrada en Hash SHA-256</span>
           </div>
         )}
       </div>
 
-      {/* 4. Modo Debug (Estructura de Datos) */}
+      {/* 4. Metadata de Seguridad (Modernizada) */}
       {signaturePayload && (
-        <div className="mt-4 animate-in scale-in-95 duration-500">
-          <div className="bg-gray-900 rounded-3xl p-6 shadow-2xl relative border-t-4 border-gold">
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
-              <div className="flex items-center gap-2 text-gold">
-                <Terminal size={16} />
-                <span className="text-[10px] uppercase font-bold tracking-widest">Metadata de Firma (JSON Payload)</span>
+        <div className="animate-in slide-in-from-top-4 duration-700">
+          <div className="bg-neutral-900 rounded-[32px] p-8 shadow-premium relative border-t-4 border-primary">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3 text-primary-light">
+                <Terminal size={18} />
+                <span className="text-[10px] uppercase font-black tracking-extreme">Payload de Seguridad FES</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/70 uppercase">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                Válido para Middleware
+              <div className="px-3 py-1 bg-success/20 rounded-full flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[9px] font-black text-success uppercase">Verificado</span>
               </div>
             </div>
             
-            <pre className="text-[11px] font-mono text-emerald-400 overflow-x-auto leading-relaxed scrollbar-thin scrollbar-thumb-white/10">
+            <pre className="text-[10px] font-mono text-primary-light/80 overflow-x-auto leading-relaxed scrollbar-none">
               {JSON.stringify(signaturePayload, null, 2)}
             </pre>
 
-            <div className="mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-[10px]">
-              <div className="flex items-center gap-4 text-white/80">
-                <div className="flex items-center gap-1">
-                  <Fingerprint size={12} />
-                  FES-CHILE-V1
-                </div>
-                <div>IP: {signaturePayload.evidence.ip}</div>
+            <div className="mt-8 pt-6 border-t border-white/5 flex justify-between items-center">
+              <div className="text-[9px] font-black text-white/30 uppercase tracking-widest">
+                ID: {signaturePayload.document.hash.slice(0, 16)}...
               </div>
               <button 
-                onClick={() => window.alert('JSON copiado al portapapeles (Simulado)')} 
-                className="text-gold hover:text-white transition-colors flex items-center gap-1.5 font-bold uppercase tracking-wider underline underline-offset-4 decoration-gold/30 hover:decoration-white"
+                onClick={() => console.log("ID de Evidencia copiado")}
+                className="text-primary-light hover:text-white transition-colors flex items-center gap-2 text-[10px] font-black uppercase tracking-widest"
               >
-                Copiar JSON de Evidencia
+                Auditar Evidencia
                 <ExternalLink size={12} />
               </button>
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, FileEdit, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { fmtCLP, fmtFecha, fmtRut, truncate } from '../../utils/formatters';
+import { ChevronLeft, ChevronRight, FileEdit, ArrowUpDown, ArrowUp, ArrowDown, User } from 'lucide-react';
+import { fmtCLP, fmtRut, truncate } from '../../utils/formatters';
 
 const ContractTable = ({ employees, onOpenContract }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,77 +40,77 @@ const ContractTable = ({ employees, onOpenContract }) => {
   }, [sortedData, currentPage]);
 
   const SortIcon = ({ columnKey }) => {
-    if (sortConfig.key !== columnKey) return <ArrowUpDown size={14} className="opacity-30 group-hover:opacity-100 transition-opacity" />;
-    return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="text-gold" /> : <ArrowDown size={14} className="text-gold" />;
+    if (sortConfig.key !== columnKey) return <ArrowUpDown size={12} className="opacity-20 group-hover:opacity-100 transition-opacity" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp size={12} className="text-primary-light" /> : <ArrowDown size={12} className="text-primary-light" />;
   };
 
   return (
     <div className="flex flex-col h-full bg-white relative">
       <div className="flex-1 overflow-auto scrollbar-thin">
         <table className="w-full text-left border-collapse table-fixed min-w-[1000px]">
-          <thead className="sticky top-0 z-20 shadow-sm">
-            <tr className="bg-conaf-800 text-white font-bold text-[11px] uppercase tracking-widest whitespace-nowrap">
-              <th className="px-6 py-4 w-[140px] cursor-pointer group hover:bg-conaf-700 transition-colors" onClick={() => handleSort('rut')}>
-                <div className="flex items-center gap-2 font-body font-bold">RUT <SortIcon columnKey="rut" /></div>
+          <thead className="sticky top-0 z-20">
+            <tr className="bg-primary-dark text-white font-black text-[10px] uppercase tracking-extreme whitespace-nowrap">
+              <th className="px-6 py-5 w-[140px] cursor-pointer group hover:bg-primary transition-colors border-r border-white/5" onClick={() => handleSort('rut')}>
+                <div className="flex items-center gap-2">RUT <SortIcon columnKey="rut" /></div>
               </th>
-              <th className="px-6 py-4 cursor-pointer group hover:bg-conaf-700 transition-colors" onClick={() => handleSort('nombrecompleto_x')}>
-                <div className="flex items-center gap-2 font-body font-bold">Nombre del Funcionario <SortIcon columnKey="nombrecompleto_x" /></div>
+              <th className="px-6 py-5 cursor-pointer group hover:bg-primary transition-colors border-r border-white/5" onClick={() => handleSort('nombrecompleto_x')}>
+                <div className="flex items-center gap-2">Funcionario <SortIcon columnKey="nombrecompleto_x" /></div>
               </th>
-              <th className="px-6 py-4 w-[220px] cursor-pointer group hover:bg-conaf-700 transition-colors" onClick={() => handleSort('tipo_cargo')}>
-                <div className="flex items-center gap-2 font-body font-bold">Cargo <SortIcon columnKey="tipo_cargo" /></div>
+              <th className="px-6 py-5 w-[220px] cursor-pointer group hover:bg-primary transition-colors border-r border-white/5" onClick={() => handleSort('tipo_cargo')}>
+                <div className="flex items-center gap-2">Cargo <SortIcon columnKey="tipo_cargo" /></div>
               </th>
-              <th className="px-6 py-4 w-[160px] cursor-pointer group hover:bg-conaf-700 transition-colors" onClick={() => handleSort('tipo_de_contrato')}>
-                <div className="flex items-center gap-2 font-body font-bold">Contrato <SortIcon columnKey="tipo_de_contrato" /></div>
+              <th className="px-6 py-5 w-[160px] cursor-pointer group hover:bg-primary transition-colors border-r border-white/5" onClick={() => handleSort('tipo_de_contrato')}>
+                <div className="flex items-center gap-2">Régimen <SortIcon columnKey="tipo_de_contrato" /></div>
               </th>
-              <th className="px-6 py-4 w-[180px] cursor-pointer group hover:bg-conaf-700 transition-colors" onClick={() => handleSort('remuneracionbruta_mensual')}>
-                <div className="flex items-center gap-2 font-body font-bold text-right justify-end">R. Bruta (Prom) <SortIcon columnKey="remuneracionbruta_mensual" /></div>
+              <th className="px-6 py-5 w-[180px] cursor-pointer group hover:bg-primary transition-colors border-r border-white/5" onClick={() => handleSort('remuneracionbruta_mensual')}>
+                <div className="flex items-center gap-2 text-right justify-end">R. Bruta (Méd.) <SortIcon columnKey="remuneracionbruta_mensual" /></div>
               </th>
-              <th className="px-6 py-4 w-[100px] text-center font-body font-bold">Acciones</th>
+              <th className="px-6 py-5 w-[100px] text-center">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 divide-dashed">
+          <tbody className="divide-y divide-neutral-50">
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan="6" className="px-6 py-24 text-center">
-                   <div className="flex flex-col items-center gap-4 text-gray-600">
-                     <span className="text-4xl">🔎</span>
-                     <p className="font-bold text-gray-500">No se encontraron funcionarios activos que coincidan.</p>
+                <td colSpan="6" className="px-6 py-32 text-center bg-neutral-50/10">
+                   <div className="flex flex-col items-center gap-6 animate-pulse">
+                     <User size={48} strokeWidth={1} className="text-neutral-200" />
+                     <p className="text-[10px] font-black uppercase tracking-extreme text-neutral-400">Sin registros de auditoría que coincidan</p>
                    </div>
                 </td>
               </tr>
             ) : (
               paginatedData.map((row, idx) => (
                 <tr 
-                  key={row.rut} 
-                  className={`group hover:bg-conaf-50 transition-colors animate-in fade-in duration-300 ${idx % 2 === 1 ? 'bg-gray-50/30' : ''}`}
+                  key={`${row.rut}-${row.tipo_cargo}-${row.tipo_de_contrato}`} 
+                  className="group hover:bg-primary/5 transition-all duration-300"
                 >
-                  <td className="px-6 py-4 text-sm font-bold text-conaf-800 font-mono tracking-tighter whitespace-nowrap bg-conaf-50/10 border-r border-gray-100 group-hover:bg-conaf-300 transition-colors">{fmtRut(row.rut)}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-5 text-[11px] font-black text-primary-dark font-mono tracking-tighter whitespace-nowrap border-r border-neutral-50/50 group-hover:bg-primary/5 transition-colors">{fmtRut(row.rut)}</td>
+                  <td className="px-6 py-5">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800 leading-tight group-hover:text-conaf-800 transition-colors">{row.nombrecompleto_x}</span>
-                      <span className="text-[10px] text-gray-600 uppercase tracking-tighter mt-0.5">{row.sexo === 'M' ? 'Masculino' : 'Femenino'}</span>
+                      <span className="text-sm font-black text-neutral-900 leading-tight group-hover:text-primary transition-colors">{row.nombrecompleto_x}</span>
+                      <span className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-1">{row.sexo}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-xs font-medium text-gray-600 truncate italic">{truncate(row.tipo_cargo, 35)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      String(row.tipo_de_contrato || '').includes('Planta') ? 'bg-emerald-100 text-emerald-800' :
-                      String(row.tipo_de_contrato || '').includes('Honorarios') ? 'bg-amber-100 text-amber-800' :
-                      'bg-sky-100 text-sky-800'
+                  <td className="px-6 py-5 text-[11px] font-bold text-neutral-500 truncate italic">{truncate(row.tipo_cargo, 35)}</td>
+                  <td className="px-6 py-5">
+                    <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest ${
+                      String(row.tipo_de_contrato || '').includes('Planta') ? 'bg-success/10 text-success border border-success/20' :
+                      String(row.tipo_de_contrato || '').includes('Honorarios') ? 'bg-warning/10 text-warning border border-warning/20' :
+                      'bg-secondary/10 text-secondary border border-secondary/20'
                     }`}>
                       {row.tipo_de_contrato}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm font-bold text-right text-conaf-700 tracking-tight font-body">
+                  <td className="px-6 py-5 text-sm font-black text-right text-neutral-900 tracking-tighter font-mono">
                     {fmtCLP(row.remuneracionbruta_mensual)}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-6 py-5 text-center">
                     <button 
                       onClick={() => onOpenContract(row)}
-                      className="p-2 text-conaf-600 hover:bg-conaf-300 hover:text-conaf-800 rounded-xl transition-all shadow-sm hover:scale-110 active:scale-95 group/btn border border-conaf-400 bg-white"
-                      title="Administrar Contrato"
+                      className="p-3 text-primary-light hover:bg-primary hover:text-white rounded-2xl transition-all shadow-soft active:scale-90 group/btn border border-neutral-100 bg-white"
+                      title="Generar Anexo"
                     >
-                      <FileEdit size={18} className="group-hover/btn:rotate-12 transition-transform" />
+                      <FileEdit size={16} strokeWidth={2.5} className="group-hover/btn:rotate-12 transition-transform" />
                     </button>
                   </td>
                 </tr>
@@ -120,24 +120,23 @@ const ContractTable = ({ employees, onOpenContract }) => {
         </table>
       </div>
 
-      {/* Footer Paginación */}
-      <div className="h-14 bg-conaf-50 flex items-center justify-between px-6 border-t border-conaf-400 shrink-0 z-10 shadow-sm">
-        <div className="text-xs font-bold text-text-main uppercase tracking-wider">
-          Mostrando <span className="text-conaf-700 font-display">{(currentPage-1)*pageSize + (paginatedData.length > 0 ? 1 : 0)} – {(currentPage-1)*pageSize + paginatedData.length}</span> de <span className="text-conaf-700 font-display">{sortedData.length}</span> registros
+      {/* Footer Paginación Premium */}
+      <div className="h-16 bg-white flex items-center justify-between px-10 border-t border-neutral-100 shrink-0 z-10">
+        <div className="text-[9px] font-black text-neutral-400 uppercase tracking-extreme">
+          Registro <span className="text-neutral-900">{(currentPage-1)*pageSize + (paginatedData.length > 0 ? 1 : 0)}-{(currentPage-1)*pageSize + paginatedData.length}</span> de <span className="text-primary font-mono text-xs">{sortedData.length}</span> activos.
         </div>
         
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-3">
           <button 
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(p => p - 1)}
-            className="p-1.5 rounded-lg border border-conaf-400 hover:bg-white enabled:active:scale-90 transition-all disabled:opacity-30 text-conaf-800 bg-conaf-50/50"
+            className="p-3 rounded-2xl border border-neutral-100 hover:bg-neutral-50 enabled:active:scale-95 transition-all disabled:opacity-20 text-neutral-400"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} strokeWidth={3} />
           </button>
           
-          <div className="flex items-center gap-1 px-3">
+          <div className="flex items-center gap-2">
             {[...Array(Math.min(5, totalPages))].map((_, i) => {
-               // Lógica simple para mostrar páginas cercanas
                let pageNum = currentPage;
                if (currentPage <= 3) pageNum = i + 1;
                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
@@ -149,7 +148,7 @@ const ContractTable = ({ employees, onOpenContract }) => {
                   <button 
                     key={pageNum}
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`min-w-[32px] h-8 rounded-lg text-xs font-bold transition-all border ${currentPage === pageNum ? 'bg-conaf-700 text-white border-conaf-700 shadow-sm' : 'bg-white hover:bg-conaf-300 text-conaf-800 border-conaf-400'}`}
+                    className={`min-w-[40px] h-10 rounded-2xl text-[11px] font-black transition-all ${currentPage === pageNum ? 'bg-primary text-white shadow-premium' : 'bg-transparent hover:bg-neutral-50 text-neutral-400 border border-transparent'}`}
                   >
                     {pageNum}
                   </button>
@@ -160,9 +159,9 @@ const ContractTable = ({ employees, onOpenContract }) => {
           <button 
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage(p => p + 1)}
-            className="p-1.5 rounded-lg border border-conaf-400 hover:bg-white enabled:active:scale-90 transition-all disabled:opacity-30 text-conaf-800 bg-conaf-50/50"
+            className="p-3 rounded-2xl border border-neutral-100 hover:bg-neutral-50 enabled:active:scale-95 transition-all disabled:opacity-20 text-neutral-400"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} strokeWidth={3} />
           </button>
         </div>
       </div>
