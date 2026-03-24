@@ -59,8 +59,16 @@ export function getKpis(rows) {
   const mujeresCount = Array.from(rutsUnicos.values()).filter(s => s === "Mujer").length;
   const pctMujeres = totalRuts > 0 ? (mujeresCount / totalRuts) * 100 : 0;
 
-  // Gasto por persona (del último periodo en las filas filtradas)
-  const gastoPorPersona = latestRows.length > 0 ? gastoTotalMes / latestRows.length : 0;
+  // Rango Etario Mayoritario (La moda de los rangos etarios)
+  const edadCounts = {};
+  rows.forEach(r => {
+    const tramo = r.age_label || "S/I";
+    if (tramo !== 'Sin determinar' && tramo !== 'S/I') {
+      edadCounts[tramo] = (edadCounts[tramo] || 0) + 1;
+    }
+  });
+  const sortedEdades = Object.entries(edadCounts).sort((a, b) => b[1] - a[1]);
+  const [rangoEtarioModa] = sortedEdades[0] || ["—", 0];
 
   return {
     dotacionTotal,
@@ -70,7 +78,7 @@ export function getKpis(rows) {
     pctContrato: Math.round(pctContrato),
     gastoTotalMes,
     pctMujeres: Math.round(pctMujeres),
-    gastoPorPersona
+    rangoEtarioModa
   };
 }
 

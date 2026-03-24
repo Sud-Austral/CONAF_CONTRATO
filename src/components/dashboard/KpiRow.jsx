@@ -49,11 +49,10 @@ const KpiRow = ({ filteredRows }) => {
       trend: "Género"
     },
     {
-      title: "Gasto por Persona",
-      value: fmtCLP(kpis.gastoPorPersona),
-      icon: <TrendingUp size={22} />,
-      trend: "Promedio Mensual",
-      unit: "CLP"
+      title: "Rango Etario Mayor",
+      value: kpis.rangoEtarioModa,
+      icon: <Users size={22} />,
+      trend: "Grupo Mayoritario"
     },
     {
       title: "R. Líquida Prom.",
