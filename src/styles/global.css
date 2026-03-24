@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Source+Sans+3:wght@400;500;600&display=swap');
+
+:root {
+  --green-900: #1a3d1a;
+  --green-800: #1e4d1e;
+  --green-700: #245924;
+  --green-600: #2d6a2d;
+  --green-500: #3a7d3a;
+  --green-400: #4a9e4a;
+  --green-300: #6ab86a;
+  --green-200: #a8d8a8;
+  --green-100: #d4edd4;
+  --gold:       #c8a84b;
+  --cream:      #f5f5f0;
+  --bg:         #f0f2ed;
+  --surface:    #ffffff;
+  --border:     #e5e7eb;
+  --text-main:  #1f2937;
+  --text-muted: #4b5563;
+  --text-light: #9ca3af;
+
+  --font-display: 'Merriweather', Georgia, serif;
+  --font-body:    'Source Sans 3', sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: 0 2px 10px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+  --transition: 0.2s ease;
+}
+
+body {
+  @apply bg-bg font-body text-text-main;
+}
+
+h1, h2, h3, h4, .font-display {
+  @apply font-display text-conaf-900;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-conaf-200 rounded-full hover:bg-conaf-300;
+}
