@@ -1,53 +1,79 @@
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700;900&family=Open+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary: #2E7D32;
-  --primary-light: #A5D6A7;
-  --primary-dark: #1B5E20;
-  --secondary: #1565C0;
-  --bg: #F5F7F5;
-  --text-main: #1C1C1C;
-  --text-muted: #616161;
-  --border: #E0E0E0;
+@layer base {
+  :root {
+    --primary: #2E7D32;
+    --primary-light: #A5D6A7;
+    --primary-dark: #1B5E20;
+    --secondary: #1565C0;
+    --bg: #F5F7F5;
+  }
+
+  body {
+    @apply bg-neutral-50 font-body text-neutral-900;
+    /* Recomendación 5: Textura sutil de ruido */
+    background-image: 
+      radial-gradient(rgba(46, 125, 50, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, #F5F7F5, #FFFFFF);
+    background-size: 24px 24px, 100% 100%;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display font-bold text-neutral-900 tracking-tight;
+  }
 }
 
-body {
-  @apply bg-neutral-50 font-body text-neutral-900;
+@layer components {
+  /* Recomendación 19: Ripple interactivo global */
+  .btn-premium {
+    @apply relative overflow-hidden transition-all duration-300 active:scale-95;
+  }
+  
+  .btn-premium::after {
+    content: '';
+    @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300;
+  }
+  
+  .btn-premium:active::after {
+    @apply opacity-100;
+  }
+
+  /* Recomendación 17: Shimmer effect */
+  .skeleton-shimmer {
+    @apply bg-neutral-200 relative overflow-hidden;
+    background: linear-gradient(
+      90deg,
+      #f0f0f0 25%,
+      #e0e0e0 50%,
+      #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
 }
 
-/* Evitar recursividad en @apply font-display */
-h1, h2, h3, h4, [class*="font-display"] {
-  font-family: 'Merriweather', Georgia, serif;
-  @apply text-neutral-900;
-}
-
-/* Scrollbar customization */
+/* Custom Scrollbar - Corregido para evitar error de PostCSS */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  @apply bg-neutral-100;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #A5D6A7;
+  background-color: rgba(46, 125, 50, 0.2);
   border-radius: 9999px;
+  transition: background-color 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
   background-color: #2E7D32;
 }
 
-/* Custom Animations */
-@keyframes loading-progress {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(350%); }
-}
-
-.animate-loading-bar {
-  animation: loading-progress 2s ease-in-out infinite;
-  width: 30%;
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
