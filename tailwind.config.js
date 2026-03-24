@@ -21,6 +21,13 @@ export default {
         gold: '#c8a84b',
         cream: '#f5f5f0',
         bg: '#f0f2ed',
+        surface: '#ffffff',
+        border: '#e5e7eb',
+        text: {
+          main: '#1f2937',
+          muted: '#4b5563',
+          light: '#9ca3af',
+        },
       },
       fontFamily: {
         display: ['Merriweather', 'Georgia', 'serif'],

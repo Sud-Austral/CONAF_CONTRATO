@@ -1,5 +1,6 @@
 {
   "name": "conaf-app",
+  "homepage": "https://Sud-Austral.github.io/CONAF_CONTRATO",
   "private": true,
   "version": "1.0.0",
   "type": "module",

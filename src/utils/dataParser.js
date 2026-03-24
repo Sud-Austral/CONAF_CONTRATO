@@ -18,13 +18,25 @@ export function parseDataJson(raw) {
     return raw;
   }
 
-  // Si es un objeto columnar (como lo genera pandas.to_json)
+  // Si es un objeto columnar o split (como lo genera pandas.to_json)
   if (typeof raw === "object" && raw !== null) {
+    // Caso orient="split": { columns, index, data }
+    if (raw.columns && raw.data) {
+      return raw.data.map((row) => {
+        const obj = {};
+        raw.columns.forEach((col, i) => {
+          obj[col] = row[i];
+        });
+        return obj;
+      });
+    }
+
+    // Caso orient="columns": { colName: { idx: val } }
     const keys = Object.keys(raw);
     if (keys.length === 0) return [];
 
-    // Tomamos la primera clave para saber cuántas filas hay
-    const recordKeys = Object.keys(raw[keys[0]]);
+    const firstKey = keys[0];
+    const recordKeys = Object.keys(raw[firstKey]);
     return recordKeys.map((idx) => {
       const obj = {};
       keys.forEach((k) => {
@@ -34,7 +46,7 @@ export function parseDataJson(raw) {
     });
   }
 
-  throw new Error("Formato de datos no soportado. Debe ser un array de objetos o un objeto columnar.");
+  throw new Error("Formato de datos no soportado. Debe ser un array de objetos o un objeto columnar/split.");
 }
 
 /**
@@ -46,11 +58,11 @@ export function enrichRows(rows) {
   return rows.map((row) => ({
     ...row,
     mesNum: MES_ORDER[row.mes] || 0,
-    anyo: parseInt(row.anyo, 10),
+    anyo: row.anyo ? parseInt(row.anyo, 10) : null,
     // Aseguramos que los campos de remuneración sean numéricos y manejamos nulos
-    remuneracionbruta_mensual: row.remuneracionbruta_mensual ? parseFloat(row.remuneracionbruta_mensual) : null,
-    remuliquida_mensual: row.remuliquida_mensual ? parseFloat(row.remuliquida_mensual) : null,
-    base: row.base ? parseFloat(row.base) : null,
+    remuneracionbruta_mensual: row.remuneracionbruta_mensual != null ? parseFloat(row.remuneracionbruta_mensual) : null,
+    remuliquida_mensual: row.remuliquida_mensual != null ? parseFloat(row.remuliquida_mensual) : null,
+    base: row.base != null ? parseFloat(row.base) : null,
   }));
 }
 
@@ -58,8 +70,13 @@ export function enrichRows(rows) {
  * Fetch and decompress data.json.gz
  */
 export async function fetchData() {
-  const res = await fetch("/data.json.gz");
-  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+  const baseUrl = import.meta.env.BASE_URL || "/";
+  // Remove trailing slash from baseUrl if it exists, and leading slash from filename
+  const cleanBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const url = `${cleanBase}/data.json.gz`;
+  
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status} at ${url}`);
   
   const buffer = await res.arrayBuffer();
   try {

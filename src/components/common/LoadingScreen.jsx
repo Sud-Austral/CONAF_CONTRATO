@@ -22,16 +22,6 @@ const LoadingScreen = () => {
         <div className="h-full bg-conaf-500 rounded-full animate-loading-bar" />
       </div>
 
-      <style jsx>{`
-        .animate-loading-bar {
-          animation: loading 2s ease-in-out infinite;
-          width: 30%;
-        }
-        @keyframes loading {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(350%); }
-        }
-      `}</style>
     </div>
   );
 };

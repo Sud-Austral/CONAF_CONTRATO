@@ -143,18 +143,9 @@ const ContractDrawer = ({ isOpen, onClose, employee }) => {
             <Download size={20} className={isValid ? 'animate-bounce-subtle' : ''} />
             Generar Contrato PDF
           </button>
-        </div>
+        </footer>
       </div>
 
-      <style jsx>{`
-        @keyframes bounce-subtle {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
-        }
-        .animate-bounce-subtle {
-          animation: bounce-subtle 2s infinite;
-        }
-      `}</style>
     </>
   );
 };
