@@ -1,60 +1,61 @@
-# Deuda Técnica del Proyecto: CONAF Gestión de Personal
+# Deuda Técnica del Proyecto: CONAF Gestión de Contratos (V2.0)
 
 ## Resumen Ejecutivo
-El proyecto es una aplicación React/Vite moderna y funcional orientada a la visualización de datos de personal y gestión de contratos con firma electrónica (FES). Aunque la interfaz es de alta calidad (premium), existen riesgos estructurales en la gestión de datos, seguridad y escalabilidad de la lógica de negocio.
+El proyecto ha sido refactorizado recientemente de una solución basada en JSON estático a una arquitectura moderna Cliente-Servidor (FastAPI/React). Si bien el "look & feel" es premium, la transición dejó atrás archivos sensibles en la carpeta pública y desincronización en la firma de las funciones de integración con la API v2.0.
 
-- **Nivel estimado de deuda técnica:** Medio / Alto
-- **Principales riesgos:** Exposición de datos sensibles (RUT/Salarios) en archivos públicos, falta de persistencia eficiente para datasets grandes y lógica de validación acoplada a la UI.
+- **Nivel estimado de deuda técnica:** Medio
+- **Principales riesgos:** Exposición de datos (Resuelto parcialmente), inconsistencia en tipos de datos entre capas y falta de cobertura de tests.
 
 ## Tabla de Prioridades
 | ID | Problema | Severidad | Impacto | Esfuerzo | Prioridad |
 |----|----------|----------|--------|----------|----------|
-| DT01 | Exposición de datos sensibles en `/public` | Crítica | Crítico | Bajo | 1 |
-| DT03 | Descompresión Gzip en Hilo Principal | Alta | Medio | Medio | 2 |
-| DT05 | Mapeo Frágil en DataParser | Alta | Alto | Bajo | 3 |
-| DT02 | Falta de Tipado Estático (TypeScript) | Media | Medio | Alto | 4 |
-| DT04 | Lógica de Negocio Acoplada a Componentes | Media | Bajo | Medio | 5 |
+| DT01 | Exposición de `data.json.gz` en `/public` | Crítica | Crítico | Bajo | 1 (FIXED) |
+| DT02 | Firma de `create` inconsistent con API v2.0 | Alta | Crítico | Bajo | 2 (FIXED) |
+| DT03 | Falta de selección de Templates en UI | Alta | Medio | Medio | 3 (FIXED) |
+| DT04 | JWT Token visible en Query Params | Media | Medio | Medio | 4 |
+| DT05 | Ausencia de Tipado Estático (TypeScript) | Media | Alto | Alto | 5 |
+| DT06 | Duplicidad de lógica en Pestañas | Baja | Bajo | Medio | 6 |
 
 ## Detalle de Problemas
 
 ### [DT01] Exposición de datos sensibles en `/public`
-- **Descripción:** El archivo `data.json.gz` se encuentra en la carpeta pública. Cualquier usuario con la URL puede descargar la base de datos completa de funcionarios, incluyendo RUTs y remuneraciones.
+- **Descripción:** El archivo `data.json.gz` contenía la base de datos completa de funcionarios. Fue eliminado durante la auditoría del 26/03.
 - **Ubicación:** `public/data.json.gz`
-- **Impacto:** Riesgo legal y de privacidad grave (Ley 19.628 de protección de datos).
+- **Impacto:** Riesgo legal crítico (Ley 19.628).
 - **Severidad:** Crítica
-- **Esfuerzo estimado:** Bajo (Mover a backend con autenticación)
-- **Recomendación:** Implementar un middleware de API que sirva los datos solo tras autenticación exitosa.
+- **Recomendación:** Asegurar que el proceso de Build no vuelva a incluir este archivo.
 
-### [DT03] Descompresión Gzip en Hilo Principal
-- **Descripción:** La descompresión de 8MB de datos se realiza en el hilo principal de JS, lo que bloquea la UI durante varios segundos en dispositivos móviles.
-- **Ubicación:** `src/utils/dataParser.js` (Función `fetchData`)
-- **Impacto:** Experiencia de usuario (Jank/Freeze) en el arranque.
+### [DT02] Firma de `create` inconsistente con API v2.0
+- **Descripción:** El componente calling enviaba un objeto único en lugar de los parámetros posicionales requeridos por el servicio actualizado.
+- **Ubicación:** `src/components/contracts/ContractDrawer.jsx`
+- **Impacto:** Bloqueo total de la funcionalidad de creación.
 - **Severidad:** Alta
-- **Esfuerzo estimado:** Medio
-- **Recomendación:** Mover la lógica de `pako.ungzip` y `JSON.parse` a un **Web Worker**.
+- **Recomendación:** (RESUELTO) Se actualizó la llamada para pasar `(id, template, datos)`.
 
-### [DT05] Mapeo Frágil en DataParser
-- **Descripción:** Las columnas se mapean manualmente basándose en nombres que pueden cambiar (ej: el error reciente donde `base` era `tipo_de_contrato`).
-- **Ubicación:** `src/utils/dataParser.js`
-- **Impacto:** Rotura de la aplicación ante cambios mínimos en el dataset original.
+### [DT03] Falta de selección de Templates en UI
+- **Descripción:** La API v2.0 permite generar distintos formatos (Honorarios, Brigadistas, etc.), pero la UI estaba hardcodeada a "Indefinido".
+- **Ubicación:** `src/components/contracts/form-sections/ContractSection.jsx`
+- **Impacto:** Limitación funcional severa.
 - **Severidad:** Alta
-- **Esfuerzo estimado:** Bajo
-- **Recomendación:** Implementar un esquema de validación (Zod) o una capa de transformación con mayor tolerancia a errores.
+- **Recomendación:** (RESUELTO) Se integró el selector alimentado por `getTemplates()`.
 
-## Quick Wins
-- **DT05-Fix:** Centralizar los nombres de las columnas en constantes para facilitar cambios rápidos.
-- **Contraste:** Ya corregido en la última iteración, pero requiere una revisión final de daltonismo.
-- **Documentación:** Llenar el `README.md` con la arquitectura detectada para nuevos desarrolladores.
+### [DT04] JWT Token visible en Query Params
+- **Descripción:** El visor de PDF usa el token en la URL para bypass de CORS/Headers en iframes.
+- **Ubicación:** `src/services/api.js` (`getPdfViewUrl`)
+- **Impacto:** Los servidores intermedios y el historial del navegador registran el secreto.
+- **Severidad:** Media
+- **Recomendación:** Implementar One-Time Tokens (OTT) en el backend.
 
-## Riesgos Críticos
-- **Seguridad de Datos:** La presencia del JSON en `/public` es el riesgo más inminente que debe resolverse antes de un despliegue real en producción.
+## Quick Wins (Logrados)
+- **Eliminación de archivos sensibles**: El riesgo DT01 ha sido mitigado.
+- **Buscador Unificado**: Se movió el buscador de funcionarios al cuerpo de la tabla para coincidir con el resto de la App.
+- **Corrección de Referencias**: Se eliminaron los errores `onAction is not defined`.
 
 ## Recomendaciones Estratégicas
-- **Migración a TypeScript:** Para un proyecto de gestión legal y financiera, la seguridad de tipos es indispensable para evitar `TypeError: ... is not a function`.
-- **Persistencia en IndexedDB:** Almacenar los datos ya parseados localmente para evitar redescargar y redescomprimir los 8MB en cada recarga de la página.
-- **Arquitectura de Dominio:** Extraer la lógica de cálculo de KPIs de `aggregations.js` a servicios puros testeables individualmente.
+- **Migración a TypeScript**: Indispensable para manejar el objeto `Contrato` que tiene 15+ campos.
+- **Web Workers para PDF**: Si se vuelve a generar el PDF en el cliente, debe hacerse fuera del hilo principal.
+- **Store Centralizado**: Migrar a Redux o Zustand para evitar el Prop Drilling en el Drawer.
 
-## Métricas
-- **Complejidad:** Media (Componentes como `ContractDrawer` gestionan demasiado estado).
-- **Cobertura de tests:** 0% (No se detectaron archivos `.test.js` o `.spec.js`).
-- **Nivel de acoplamiento:** Alto entre la estructura del dataset y la visualización.
+## Métricas (Inferidas)
+- **Complejidad ciclomática**: Alta en `ContractDrawer` (maneja demasiados estados de workflow).
+- **Cobertura de tests**: 0%. Se recomienda iniciar con tests de integración para el servicio `api.js`.

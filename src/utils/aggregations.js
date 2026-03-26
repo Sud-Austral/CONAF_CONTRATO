@@ -1,261 +1,125 @@
-import { MES_ORDER } from "./dataParser";
 import { truncate } from "./formatters";
 
 /**
- * Retorna las métricas clave (KPIs)
+ * Retorna las métricas clave (KPIs) para la dotación ACTUAL.
+ * Acepta empleados NORMALIZADOS por el DataContext.
  */
 export function getKpis(rows) {
-  if (rows.length === 0) {
+  if (!rows || rows.length === 0) {
     return {
       dotacionTotal: 0,
       brutaPromedio: 0,
-      liquidaPromedio: 0,
+      gastoTotalMes: 0,
       contratoMasFrecuente: "—",
       pctContrato: 0,
-      gastoTotalMes: 0,
-      pctMujeres: 0,
-      avgAntiguedad: 0
+      pctActivos: 0,
+      cargosUnicos: 0
     };
   }
 
-  // Dotación total por RUTs únicos
-  const dotacionTotal = new Set(rows.map(r => r.rut)).size;
+  // 1. Dotación total (filas recibidas)
+  const dotacionTotal = rows.length;
 
-  // Remuneración bruta y líquida promedio (excluyendo nulls)
-  const brutaRows = rows.filter(r => r.remuneracionbruta_mensual !== null);
-  const liquidaRows = rows.filter(r => r.remuliquida_mensual !== null);
-
-  const brutaTotal = brutaRows.reduce((acc, curr) => acc + curr.remuneracionbruta_mensual, 0);
-  const liquidaTotal = liquidaRows.reduce((acc, curr) => acc + curr.remuliquida_mensual, 0);
-
+  // 2. Remuneración bruta promedio (usando .bruta normalizada)
+  const brutaRows = rows.filter(r => r.bruta > 0);
+  const brutaTotal = brutaRows.reduce((acc, curr) => acc + Number(curr.bruta || 0), 0);
   const brutaPromedio = brutaRows.length > 0 ? brutaTotal / brutaRows.length : 0;
-  const liquidaPromedio = liquidaRows.length > 0 ? liquidaTotal / liquidaRows.length : 0;
+  
+  // 3. Gasto Total Mensual
+  const gastoTotalMes = brutaTotal;
 
-  // Contrato más frecuente
+  // 4. Modalidad de contrato más frecuente (usando .contratoTipo normalizado)
   const contratoCounts = {};
   rows.forEach(r => {
-    contratoCounts[r.tipo_de_contrato] = (contratoCounts[r.tipo_de_contrato] || 0) + 1;
+    const tipo = r.contratoTipo || "Sin especificar";
+    contratoCounts[tipo] = (contratoCounts[tipo] || 0) + 1;
   });
-
   const sortedContratos = Object.entries(contratoCounts).sort((a, b) => b[1] - a[1]);
   const [contratoMasFrecuente, count] = sortedContratos[0] || ["—", 0];
-  const pctContrato = rows.length > 0 ? (count / rows.length) * 100 : 0;
+  const pctContrato = (count / rows.length) * 100;
 
-  // Gasto mensual (del último periodo en las filas filtradas)
-  const sorted = [...rows].sort((a, b) => {
-    if (a.anyo !== b.anyo) return b.anyo - a.anyo;
-    return (b.mesNum || 0) - (a.mesNum || 0);
-  });
-  const latest = sorted[0];
-  const latestRows = rows.filter(r => r.anyo === latest.anyo && r.mesNum === latest.mesNum);
-  const gastoTotalMes = latestRows.reduce((acc, curr) => acc + (curr.remuneracionbruta_mensual || 0), 0);
+  // 5. Funcionarios Activos (usando .activo normalizado)
+  const activosCount = rows.filter(r => r.activo).length;
+  const pctActivos = (activosCount / rows.length) * 100;
 
-  // Porcentaje Mujeres (sobre total de RUTs únicos en la selección)
-  const rutsUnicos = new Map();
-  rows.forEach(r => {
-    if (!rutsUnicos.has(r.rut)) rutsUnicos.set(r.rut, r.sexo);
-  });
-  const totalRuts = rutsUnicos.size;
-  const mujeresCount = Array.from(rutsUnicos.values()).filter(s => s === "Mujer").length;
-  const pctMujeres = totalRuts > 0 ? (mujeresCount / totalRuts) * 100 : 0;
-
-  // Rango Etario Mayoritario (La moda de los rangos etarios)
-  const edadCounts = {};
-  rows.forEach(r => {
-    const tramo = r.age_label || "S/I";
-    if (tramo !== 'Sin determinar' && tramo !== 'S/I') {
-      edadCounts[tramo] = (edadCounts[tramo] || 0) + 1;
-    }
-  });
-  const sortedEdades = Object.entries(edadCounts).sort((a, b) => b[1] - a[1]);
-  const [rangoEtarioModa] = sortedEdades[0] || ["—", 0];
+  // 6. Diversidad de Cargos (usando .cargo normalizado)
+  const cargosUnicos = new Set(rows.map(r => r.cargo)).size;
 
   return {
     dotacionTotal,
     brutaPromedio,
-    liquidaPromedio,
+    gastoTotalMes,
     contratoMasFrecuente,
     pctContrato: Math.round(pctContrato),
-    gastoTotalMes,
-    pctMujeres: Math.round(pctMujeres),
-    rangoEtarioModa
+    pctActivos: Math.round(pctActivos),
+    cargosUnicos,
+    liquidaPromedio: brutaPromedio * 0.8 // Estimación simple
   };
 }
 
 /**
- * Retorna la dotación agremiada por tipo de contrato
+ * Distribución por Estamento / Organismo
  */
-export function getDotacionPorContrato(rows) {
+export function getDistribucionOrganismo(rows) {
   const counts = {};
   rows.forEach(r => {
-    counts[r.tipo_de_contrato] = (counts[r.tipo_de_contrato] || 0) + 1;
+    const org = r.organismo || "S/I";
+    counts[org] = (counts[org] || 0) + 1;
   });
 
   return Object.entries(counts)
     .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value);
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
 }
 
 /**
- * Retorna la evolución temporal de la dotación por tipo de contrato
+ * Top Cargos por Dotación
  */
-export function getEvolucionDotacion(rows) {
-  const periodos = {};
-  
-  rows.forEach(r => {
-    const key = `${r.anyo}-${r.mesNum}`;
-    if (!periodos[key]) {
-      periodos[key] = { label: `${r.mes?.slice(0,3)} ${r.anyo}`, anyo: r.anyo, mesNum: r.mesNum };
-    }
-    periodos[key][r.tipo_de_contrato] = (periodos[key][r.tipo_de_contrato] || 0) + 1;
-  });
-
-  // Identificar los 5 contratos más comunes para consolidar el resto en "Otros"
-  const totalCounts = {};
-  rows.forEach(r => {
-    totalCounts[r.tipo_de_contrato] = (totalCounts[r.tipo_de_contrato] || 0) + 1;
-  });
-  const top5Contratos = Object.entries(totalCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name]) => name);
-
-  const sortedPeriodos = Object.values(periodos).sort((a, b) => {
-    if (a.anyo !== b.anyo) return a.anyo - b.anyo;
-    return a.mesNum - b.mesNum;
-  });
-
-  return sortedPeriodos.map(periodo => {
-    const result = { periodo: periodo.label };
-    let otros = 0;
-    
-    Object.keys(periodo).forEach(k => {
-      if (k === 'label' || k === 'anyo' || k === 'mesNum') return;
-      if (top5Contratos.includes(k)) {
-        result[k] = periodo[k];
-      } else {
-        otros += periodo[k];
-      }
-    });
-
-    if (otros > 0) result["Otros"] = otros;
-    return result;
-  });
-}
-
-/**
- * Retorna la distribución por sexo
- */
-export function getDistribucionSexo(rows) {
-  const counts = { "Hombre": 0, "Mujer": 0, "Sin determinar": 0 };
-  rows.forEach(r => {
-    const sex = r.sexo || "Sin determinar";
-    counts[sex] = (counts[sex] || 0) + 1;
-  });
-
-  return Object.entries(counts)
-    .filter(([_, value]) => value > 0)
-    .map(([name, value]) => ({ name, value }));
-}
-
-/**
- * Retorna la distribución por tramos de edad y sexo
- */
-export function getDistribucionEdad(rows) {
+export function getTopCargos(rows, n = 8) {
   const counts = {};
   rows.forEach(r => {
-    const tramo = r.age_label || "S/I";
-    if (!counts[tramo]) counts[tramo] = { age_label: tramo, Hombre: 0, Mujer: 0 };
-    if (r.sexo === "Hombre") counts[tramo].Hombre++;
-    else if (r.sexo === "Mujer") counts[tramo].Mujer++;
-  });
-
-  return Object.values(counts).sort((a, b) => a.age_label.localeCompare(b.age_label));
-}
-
-/**
- * Retorna la evolución temporal de la remuneración promedio
- */
-export function getEvolucionRemuneracion(rows) {
-  const periodos = {};
-  rows.forEach(r => {
-    if (r.remuneracionbruta_mensual === null) return;
-    const key = `${r.anyo}-${r.mesNum}`;
-    if (!periodos[key]) {
-      periodos[key] = { label: `${r.mes?.slice(0,3)} ${r.anyo}`, anyo: r.anyo, mesNum: r.mesNum, sum: 0, count: 0 };
-    }
-    periodos[key].sum += r.remuneracionbruta_mensual;
-    periodos[key].count += 1;
-  });
-
-  return Object.values(periodos)
-    .sort((a, b) => {
-      if (a.anyo !== b.anyo) return a.anyo - b.anyo;
-      return a.mesNum - b.mesNum;
-    })
-    .map(p => ({
-      periodo: p.label,
-      promedio: p.sum / p.count
-    }));
-}
-
-/**
- * Retorna información detallada del periodo más reciente
- */
-export function getLatestPeriodInfo(rows) {
-  if (rows.length === 0) return null;
-
-  // Encontrar el periodo más reciente
-  const sorted = [...rows].sort((a, b) => {
-    if (a.anyo !== b.anyo) return b.anyo - a.anyo;
-    return (b.mesNum || 0) - (a.mesNum || 0);
-  });
-
-  const latest = sorted[0];
-  const latestRows = rows.filter(r => r.anyo === latest.anyo && (r.mesNum || 0) === (latest.mesNum || 0));
-
-  // Top 10 remuneraciones de ese periodo
-  const top10Brutas = [...latestRows]
-    .filter(r => r.remuneracionbruta_mensual !== null)
-    .sort((a, b) => b.remuneracionbruta_mensual - a.remuneracionbruta_mensual)
-    .slice(0, 10)
-    .map(r => ({
-      nombre: r.nombrecompleto_x,
-      cargo: truncate(r.tipo_cargo, 30),
-      bruta: r.remuneracionbruta_mensual,
-      contrato: r.tipo_de_contrato
-    }));
-
-  // Gasto total del periodo
-  const gastoTotal = latestRows.reduce((acc, curr) => acc + (curr.remuneracionbruta_mensual || 0), 0);
-
-  // Sexo del periodo
-  const sexCounts = { Hombre: 0, Mujer: 0, "Sin determinar": 0 };
-  latestRows.forEach(r => sexCounts[r.sexo || "Sin determinar"]++);
-
-  return {
-    label: `${latest.mes} ${latest.anyo}`,
-    mes: latest.mes,
-    anyo: latest.anyo,
-    dotacion: latestRows.length,
-    gastoTotal,
-    top10Brutas,
-    sexDist: Object.entries(sexCounts).map(([name, value]) => ({ name, value }))
-  };
-}
-
-/**
- * Retorna el top N de cargos
- */
-export function getTopCargos(rows, n = 10) {
-  const counts = {};
-  rows.forEach(r => {
-    const cargo = r.tipo_cargo || "S/I";
+    const cargo = r.cargo || "S/I";
     counts[cargo] = (counts[cargo] || 0) + 1;
   });
 
   return Object.entries(counts)
-    .map(([cargo, count]) => ({ cargo: truncate(cargo, 35), count }))
+    .map(([cargo, count]) => ({ cargo: truncate(cargo, 30), count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, n);
 }
+
+// Histograma de remuneraciones usando .bruta normalizada
+export function getDistribucionRemuneracion(rows) {
+  const rangos = [
+    { label: '< 1M', min: 0, max: 1000000 },
+    { label: '1M - 2M', min: 1000001, max: 2000000 },
+    { label: '2M - 3M', min: 2000001, max: 3000000 },
+    { label: '3M - 5M', min: 3000001, max: 5000000 },
+    { label: '> 5M', min: 5000001, max: Infinity }
+  ];
+
+  const dist = rangos.map(r => ({ ...r, value: 0 }));
+  
+  rows.forEach(r => {
+    const monto = Number(r.bruta || 0);
+    const range = dist.find(range => monto >= range.min && monto <= range.max);
+    if (range) range.value++;
+  });
+
+  return dist.map(({ label, value }) => ({ name: label, value }));
+}
+
+// Stubs para compatibilidad
+export const getLatestPeriodInfo = (rows) => ({ label: "Actual", dotacion: rows.length });
+export function getDotacionPorContrato(rows) {
+    const counts = {};
+    rows.forEach(r => {
+      counts[r.contratoTipo || "S/I"] = (counts[r.contratoTipo || "S/I"] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+}
+export const getDistribucionSexo = () => [];
+export const getDistribucionEdad = () => [];
+export const getEvolucionDotacion = () => [];
+export const getEvolucionRemuneracion = () => [];

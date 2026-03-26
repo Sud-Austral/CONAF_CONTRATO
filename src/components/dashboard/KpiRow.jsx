@@ -1,36 +1,56 @@
 import React, { useMemo } from 'react';
 import KpiCard from '../common/KpiCard';
-import { Users, TrendingUp, Wallet, Briefcase, Calendar } from 'lucide-react';
-import { getKpis, getLatestPeriodInfo } from '../../utils/aggregations';
+import { Users, TrendingUp, Wallet, FileCheck, Shield } from 'lucide-react';
+import { getKpis } from '../../utils/aggregations';
 import { fmtCLP } from '../../utils/formatters';
 
-const KpiRow = ({ filteredRows }) => {
+const KpiRow = ({ filteredRows, contracts = [] }) => {
   const kpis = useMemo(() => getKpis(filteredRows), [filteredRows]);
-  const latestInfo = useMemo(() => getLatestPeriodInfo(filteredRows), [filteredRows]);
+  
+  // Métricas adicionales de auditoría de contratos
+  const auditMetrics = useMemo(() => {
+    // Cuántos empleados únicos tienen al menos un contrato en la lista
+    const uniqueEmpsInContracts = new Set(contracts.map(c => c.empleado_id)).size;
+    const completedContracts = contracts.filter(c => c.estado === 'completado').length;
+    
+    return {
+      cobertura: Math.round((contracts.length / (filteredRows.length || 1)) * 100),
+      totalCompletos: completedContracts,
+      pctEficiencia: Math.round((completedContracts / (contracts.length || 1)) * 100)
+    };
+  }, [contracts, filteredRows]);
 
   const cards = [
-    {
-      title: "Corte de Datos",
-      value: latestInfo?.label || "—",
-      icon: <Calendar size={24} />,
-      trend: "Último Periodo",
-      color: "primary"
-    },
     {
       title: "Dotación Total",
       value: new Intl.NumberFormat('es-CL').format(kpis.dotacionTotal),
       unit: "Funcionarios",
       icon: <Users size={24} />,
-      trend: "Personal Único"
+      trend: "Personal Activo",
+      color: "primary"
+    },
+    {
+      title: "Cobertura Contratos",
+      value: `${contracts.length} / ${kpis.dotacionTotal}`,
+      unit: `${auditMetrics.cobertura}%`,
+      icon: <FileCheck size={24} />,
+      trend: "Contratos Generados"
+    },
+    {
+      title: "Eficiencia Auditoría",
+      value: `${auditMetrics.totalCompletos}`,
+      unit: `${auditMetrics.pctEficiencia}%`,
+      icon: <Shield size={24} />,
+      trend: "Estado: Completados"
     },
     {
       title: "Gasto Mensual",
       value: fmtCLP(kpis.gastoTotalMes),
       icon: <Wallet size={24} />,
-      trend: "Último Mes"
+      trend: "Estimado (Brutos)"
     },
     {
-      title: "R. Bruta Promedio",
+      title: "Rem. Bruta Promedio",
       value: fmtCLP(kpis.brutaPromedio),
       icon: <TrendingUp size={24} />,
       trend: "Histórico"
@@ -39,26 +59,22 @@ const KpiRow = ({ filteredRows }) => {
       title: "Contrato Principal",
       value: kpis.contratoMasFrecuente,
       unit: `${kpis.pctContrato}%`,
-      icon: <Briefcase size={24} />,
-      trend: "Moda"
+      icon: <Shield size={22} />,
+      trend: "Moda Contractual"
     },
     {
-      title: "Mujeres en Dotación",
-      value: `${kpis.pctMujeres}%`,
-      icon: <Users size={24} />,
-      trend: "Género"
-    },
-    {
-      title: "Rango Etario Mayor",
-      value: kpis.rangoEtarioModa,
+      title: "Diversidad de Cargos",
+      value: kpis.cargosUnicos,
+      unit: "Cargos",
       icon: <Users size={22} />,
-      trend: "Grupo Mayoritario"
+      trend: "Selección Única"
     },
     {
-      title: "R. Líquida Prom.",
-      value: fmtCLP(kpis.liquidaPromedio),
-      icon: <Wallet size={24} />,
-      trend: "Estimado"
+      title: "Efectividad Digital",
+      value: `${Math.round(contracts.filter(c => c.pdf_generado_path).length)}`,
+      unit: "PDFs",
+      icon: <FileCheck size={24} />,
+      trend: "Archivos Firmados"
     }
   ];
 

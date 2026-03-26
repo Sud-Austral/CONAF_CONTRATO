@@ -1,125 +1,72 @@
-import React from 'react';
-import { useConafData } from '../../context/DataContext';
+import { LogOut, User, Activity, FileText, HardDrive } from 'lucide-react';
 
-const Navbar = ({ activeTab, setActiveTab }) => {
-  const { rows } = useConafData();
-  const totalEmployees = new Intl.NumberFormat('es-CL').format(new Set(rows.map(r => r.rut)).size);
-
+const Navbar = ({ activeTab, setActiveTab, user, onLogout }) => {
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', badge: totalEmployees },
-    { id: 'contracts', label: 'Gestión de Contratos' },
+    { id: 'dashboard', label: 'Dashboard', icon: Activity },
+    { id: 'contracts', label: 'Gestión de Contratos', icon: FileText },
+    { id: 'load',      label: 'Archivos / Backup', icon: HardDrive },
   ];
 
+  // Ya no filtramos por rol, todos ven todo (según requerimiento)
+  // Pero ocultamos 'load' del menú por petición del usuario (acceso directo por URL)
+  const availableTabs = tabs.filter(t => t.id !== 'load');
+
   return (
-    <nav style={{
-      height: '56px',
-      backgroundColor: '#1B5E20',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingLeft: '24px',
-      paddingRight: '24px',
-      position: 'relative',
-      zIndex: 50,
-      boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-      flexShrink: 0,
-    }}>
+    <nav className="h-16 bg-primary-dark flex items-center justify-between px-8 relative z-50 shadow-premium shrink-0 border-b border-white/5">
       {/* Brand */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{
-          width: '32px', height: '32px',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          borderRadius: '8px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: '1px solid rgba(255,255,255,0.15)',
-          color: '#A5D6A7',
-          fontSize: '14px',
-        }}>🌲</div>
-        <div>
-          <div style={{ color: '#ffffff', fontWeight: '500', fontSize: '14px', letterSpacing: '0.05em', lineHeight: 1 }}>
-            CONAF
-          </div>
-          <div style={{ color: '#A5D6A7', fontWeight: '500', fontSize: '8px', letterSpacing: '0.15em', marginTop: '2px' }}>
-            INSTITUCIONAL
-          </div>
+      <div className="flex items-center gap-4 group cursor-default">
+        <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 text-primary-light transition-transform group-hover:scale-110">
+          <span className="text-xl">🌲</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-white font-black text-sm tracking-tight leading-none">CONAF</span>
+          <span className="text-primary-light font-black text-[8px] tracking-extreme mt-1 uppercase">Institucional</span>
         </div>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', alignItems: 'stretch', height: '100%' }}>
-        {tabs.map(tab => {
+      <div className="flex h-full items-stretch gap-2">
+        {availableTabs.map(tab => {
           const isActive = activeTab === tab.id;
+          const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                height: '100%',
-                backgroundColor: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
-                color: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)',
-                border: 'none',
-                borderBottom: isActive ? '3px solid #A5D6A7' : '3px solid transparent',
-                cursor: 'pointer',
-                fontWeight: '500',
-                fontSize: '11px',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                transition: 'all 0.3s ease',
-                fontFamily: 'inherit',
-              }}
-              onMouseEnter={e => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
-                  e.currentTarget.style.color = '#ffffff';
-                }
-              }}
-              onMouseLeave={e => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-                }
-              }}
+              className={`
+                px-6 flex items-center gap-3 transition-all relative group
+                ${isActive ? 'text-white' : 'text-white/50 hover:text-white'}
+              `}
             >
-              {tab.label}
-              {tab.badge && (
-                <span style={{
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                  color: '#ffffff',
-                  fontSize: '9px',
-                  fontWeight: '500',
-                  padding: '1px 6px',
-                  borderRadius: '4px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                }}>
-                  {tab.badge}
-                </span>
+              <Icon size={16} strokeWidth={isActive ? 3 : 2} className={isActive ? 'text-primary-light' : ''} />
+              <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
+              {isActive && (
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-primary-light animate-in fade-in slide-in-from-bottom-1" />
               )}
             </button>
           );
         })}
       </div>
 
-      {/* User */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ color: '#ffffff', fontSize: '11px', fontWeight: '500', lineHeight: 1 }}>Admin Usuario</div>
-          <div style={{ color: 'rgba(165, 214, 167, 0.8)', fontSize: '8px', fontWeight: '500', letterSpacing: '0.1em', marginTop: '3px' }}>RR.HH. Central</div>
+      {/* User & Logout */}
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-white text-[11px] font-black leading-none">{user?.nombre || "Usuario"}</p>
+            <p className="text-primary-light text-[8px] font-black tracking-widest mt-1 uppercase opacity-80">{user?.rol || "Rol"}</p>
+          </div>
+          <div className="w-10 h-10 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-white font-black text-xs shadow-inner">
+            {user?.nombre?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || "AD"}
+          </div>
         </div>
-        <div style={{
-          width: '32px', height: '32px',
-          backgroundColor: 'rgba(255,255,255,0.08)',
-          border: '1.5px solid rgba(255,255,255,0.15)',
-          borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#ffffff',
-          fontWeight: '500',
-          fontSize: '10px',
-        }}>AD</div>
+
+        <button 
+          onClick={onLogout}
+          className="p-3 bg-error/10 text-error hover:bg-error hover:text-white rounded-xl transition-all active:scale-90 border border-error/20 group"
+          title="Cerrar Sesión"
+        >
+          <LogOut size={16} strokeWidth={3} className="group-hover:-translate-x-1 transition-transform" />
+        </button>
       </div>
     </nav>
   );

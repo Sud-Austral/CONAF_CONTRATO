@@ -2,12 +2,14 @@
  * Formato moneda chilena (CLP)
  */
 export const fmtCLP = (n) => {
-  if (n === null || n === undefined || isNaN(n)) return '—';
+  // La API devuelve remuneracion_bruta_mensual como string
+  const num = typeof n === 'string' ? parseFloat(n) : n;
+  if (num === null || num === undefined || isNaN(num)) return '—';
   return new Intl.NumberFormat('es-CL', {
     style: 'currency',
     currency: 'CLP',
     maximumFractionDigits: 0,
-  }).format(n);
+  }).format(num);
 };
 
 /**

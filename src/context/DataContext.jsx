@@ -1,50 +1,62 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { fetchData, MES_ORDER } from '../utils/dataParser';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { empleadosService, contratosService } from '../services/api';
+import { normalizeEmpleado, normalizeContrato } from '../utils/schemaMapping';
 
 const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState([]);      // Empleados normalizados
+  const [contratos, setContratos] = useState([]); // Contratos normalizados
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    const loadAllData = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchData();
-        setRows(data);
-        setError(null);
-      } catch (err) {
-        console.error("Error cargando datos:", err);
-        setError(err.message || "No se pudieron cargar los datos de personal.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadAllData();
+  // Carga inicial (Dashboard/Listados)
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [empRes, contRes] = await Promise.all([
+        empleadosService.list({ limit: 200, activo: true }),
+        contratosService.list({ limit: 200 })
+      ]);
+      
+      // Aplicamos normalización CENTRALIZADA
+      setRows((empRes.data || []).map(normalizeEmpleado));
+      setTotal(empRes.total || 0);
+      setContratos((contRes.items || []).map(normalizeContrato));
+      
+    } catch (err) {
+      console.error("Error al cargar datos:", err);
+      setError("No se pudo conectar con el servidor para obtener métricas.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const uniqueValues = useMemo(() => {
-    if (rows.length === 0) return { anyos: [], meses: [], tipoCargo: [], tipoContrato: [], ageLabels: [] };
-
-    const anyos = [...new Set(rows.map(r => r.anyo))].sort((a, b) => b - a);
-    const mesesRaw = [...new Set(rows.map(r => r.mes))];
-    const meses = mesesRaw.sort((a, b) => (MES_ORDER[a] || 0) - (MES_ORDER[b] || 0));
-    const tipoCargo = [...new Set(rows.map(r => r.tipo_cargo))].sort();
-    const tipoContrato = [...new Set(rows.map(r => r.tipo_de_contrato))].sort();
-    const ageLabels = [...new Set(rows.map(r => r.age_label).filter(Boolean))].sort();
-
-    return { anyos, meses, tipoCargo, tipoContrato, ageLabels };
-  }, [rows]);
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      loadDashboardData();
+    }
+  }, [loadDashboardData]);
 
   const value = {
-    rows,
+    rows,         // Datos normalizados
+    contratos,    // Datos normalizados
+    total,        // Total de empleados
     loading,
     error,
-    uniqueValues,
-    retry: () => fetchData().then(setRows).catch(err => setError(err.message))
+    refresh: loadDashboardData,
+    // Función de búsqueda también normalizada
+    searchEmployees: async (query, proceso = '') => {
+      const { data } = await empleadosService.list({ 
+        search: query, 
+        proceso_contrato: proceso, 
+        limit: 100 
+      });
+      return data.map(normalizeEmpleado);
+    }
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
@@ -52,8 +64,6 @@ export const DataProvider = ({ children }) => {
 
 export const useConafData = () => {
   const context = useContext(DataContext);
-  if (!context) {
-    throw new Error('useConafData must be used within a DataProvider');
-  }
+  if (!context) throw new Error('useConafData must be used within a DataProvider');
   return context;
 };

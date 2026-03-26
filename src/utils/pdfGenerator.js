@@ -75,7 +75,9 @@ export async function generateContractPdf({
 
   addText("y", 10, "helvetica", "normal", "center");
 
-  const introTrabajador = `${employee.nombrecompleto_x}, cédula de identidad N° ${employee.rut}, domiciliado en Domicilio Registrado, en adelante el "Trabajador";`;
+  const nombreEmpleado = (employee.nombreencontrado || employee.nombrecompleto_x || 'S/N').toUpperCase();
+  const rutEmpleado = fmtRut(employee.rut);
+  const introTrabajador = `${nombreEmpleado}, cédula de identidad N° ${rutEmpleado}, domiciliado en Domicilio Registrado, en adelante el "Trabajador";`;
   addText(introTrabajador, 10, "helvetica", "bold");
 
   addText("se ha convenido el siguiente contrato de trabajo:", 10);

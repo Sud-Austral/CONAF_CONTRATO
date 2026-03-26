@@ -1,15 +1,19 @@
 import React from 'react';
-import { useConafData } from '../../../context/DataContext';
 import { fmtFechaISO } from '../../../utils/formatters';
 
+// Valores del dominio de negocio CONAF
+const TIPOS_CONTRATO = [
+  'Planta', 'Contrata', 'Honorarios', 'Código del Trabajo', 'Código Laboral', 'Otro'
+];
+
 const InputField = ({ label, name, value, onChange, type = "text", options = [], original }) => {
-  const isChanged = String(value) !== String(original);
+  const isChanged = String(value ?? '') !== String(original ?? '');
   
   return (
-    <div className={`flex flex-col gap-1.5 p-3.5 rounded-xl transition-all border ${isChanged ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-100 hover:border-conaf-400'}`}>
+    <div className={`flex flex-col gap-1.5 p-3.5 rounded-xl transition-all border ${isChanged ? 'bg-amber-50 border-amber-200' : 'bg-white border-neutral-100 hover:border-primary/20'}`}>
       <div className="flex items-center justify-between">
-        <label className="text-[10px] uppercase font-bold text-gray-700 tracking-wider font-body leading-none">{label}</label>
-        {isChanged && <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-full uppercase">Editado</span>}
+        <label className="text-[10px] uppercase font-black text-neutral-400 tracking-extreme leading-none">{label}</label>
+        {isChanged && <span className="text-[9px] font-black text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-full uppercase">Editado</span>}
       </div>
       
       {type === 'select' ? (
@@ -17,7 +21,7 @@ const InputField = ({ label, name, value, onChange, type = "text", options = [],
           name={name} 
           value={value || ''} 
           onChange={(e) => onChange(name, e.target.value)}
-          className="text-sm font-bold text-conaf-900 bg-transparent focus:outline-none focus:ring-1 focus:ring-gold rounded transition-all cursor-pointer"
+          className="text-xs font-bold text-neutral-900 bg-transparent focus:outline-none cursor-pointer mt-1"
         >
           <option value="">Seleccione una opción</option>
           {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -28,7 +32,7 @@ const InputField = ({ label, name, value, onChange, type = "text", options = [],
           name={name} 
           value={value || ''} 
           onChange={(e) => onChange(name, e.target.value)}
-          className="text-sm font-bold text-conaf-900 bg-transparent focus:outline-none focus:ring-1 focus:ring-gold rounded transition-all placeholder:text-gray-600"
+          className="text-xs font-bold text-neutral-900 bg-transparent focus:outline-none mt-1 placeholder:text-neutral-300"
           placeholder={`Ingrese ${label.toLowerCase()}...`}
         />
       )}
@@ -36,78 +40,81 @@ const InputField = ({ label, name, value, onChange, type = "text", options = [],
   );
 };
 
-const ContractSection = ({ formData, originalData, onChange }) => {
-  const { uniqueValues } = useConafData();
-
+/**
+ * Sección de definición de contrato: usa nombres NORMALIZADOS (.organismo, .cargo, .contratoTipo, .fechaInicio)
+ */
+const ContractSection = ({ formData, originalData, onChange, templates = [], selectedTemplate, onTemplateChange }) => {
   return (
-    <div className="p-6 grid grid-cols-2 gap-4 animate-in slide-in-from-right-4 duration-500">
-      <InputField 
-        label="Organismo" 
-        name="organismo_nombre" 
-        value={formData.organismo_nombre} 
-        onChange={onChange} 
-        original={originalData?.organismo_nombre}
-      />
+    <div className="flex flex-col gap-8 animate-in slide-in-from-right-4 duration-500">
+      
+      {/* Selector de Plantilla */}
+      <div className="p-5 bg-primary/5 border border-primary/20 rounded-3xl space-y-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-xl bg-primary text-white flex items-center justify-center">
+            <span className="text-[10px] font-black italic">PDF</span>
+          </div>
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-extreme text-primary-dark">Tipo de Documento</h4>
+            <p className="text-[9px] font-bold text-neutral-400 uppercase tracking-widest mt-0.5">Seleccione el formato legal a generar</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3">
+          {templates.length > 0 ? (
+            <select
+              value={selectedTemplate}
+              onChange={(e) => onTemplateChange(e.target.value)}
+              className="w-full px-6 py-4 bg-white border border-neutral-100 rounded-2xl text-xs font-black text-neutral-900 focus:border-primary focus:ring-0 transition-all cursor-pointer appearance-none shadow-premium"
+            >
+              {templates.map(t => (
+                <option key={t.id} value={t.id}>{t.label.toUpperCase()}</option>
+              ))}
+            </select>
+          ) : (
+            <div className="p-3 bg-white/50 border border-dashed border-neutral-200 rounded-2xl text-center text-[9px] font-bold text-neutral-400 animate-pulse">
+              Cargando formatos disponibles...
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <InputField 
+            label="Organismo / Departamento" 
+            name="organismo" 
+            value={formData.organismo} 
+            onChange={onChange} 
+            original={originalData?.organismo}
+          />
+        </div>
+        <div className="col-span-2">
+          <InputField 
+            label="Cargo / Función" 
+            name="cargo" 
+            value={formData.cargo} 
+            onChange={onChange} 
+            original={originalData?.cargo}
+          />
+        </div>
         <InputField 
-          label="Año" 
-          name="anyo" 
-          type="number"
-          value={formData.anyo} 
-          onChange={onChange} 
-          original={originalData?.anyo}
-        />
-        <InputField 
-          label="Mes" 
-          name="mes" 
+          label="Modalidad de Contrato" 
+          name="contratoTipo" 
           type="select"
-          options={uniqueValues.meses}
-          value={formData.mes} 
+          options={TIPOS_CONTRATO}
+          value={formData.contratoTipo} 
           onChange={onChange} 
-          original={originalData?.mes}
+          original={originalData?.contratoTipo}
         />
-      </div>
-      <div className="col-span-2">
         <InputField 
-          label="Cargo / Función" 
-          name="tipo_cargo" 
-          value={formData.tipo_cargo} 
+          label="Fecha de Inicio" 
+          name="fechaInicio" 
+          type="date"
+          value={fmtFechaISO(formData.fechaInicio)} 
           onChange={onChange} 
-          original={originalData?.tipo_cargo}
+          original={fmtFechaISO(originalData?.fechaInicio)}
         />
       </div>
-      <InputField 
-        label="Modalidad" 
-        name="tipo_de_contrato" 
-        type="select"
-        options={uniqueValues.tipoContrato}
-        value={formData.tipo_de_contrato} 
-        onChange={onChange} 
-        original={originalData?.tipo_de_contrato}
-      />
-      <InputField 
-        label="Tipo de Pago" 
-        name="tipo_pago" 
-        value={formData.tipo_pago} 
-        onChange={onChange} 
-        original={originalData?.tipo_pago}
-      />
-      <InputField 
-        label="Fecha de Ingreso" 
-        name="fecha_ingreso" 
-        type="date"
-        value={fmtFechaISO(formData.fecha_ingreso)} 
-        onChange={onChange} 
-        original={fmtFechaISO(originalData?.fecha_ingreso)}
-      />
-       <InputField 
-        label="Término de Contrato" 
-        name="fecha_termino" 
-        type="date"
-        value={fmtFechaISO(formData.fecha_termino)} 
-        onChange={onChange} 
-        original={fmtFechaISO(originalData?.fecha_termino)}
-      />
     </div>
   );
 };
